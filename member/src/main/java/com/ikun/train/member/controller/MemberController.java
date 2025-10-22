@@ -1,6 +1,6 @@
 package com.ikun.train.member.controller;
 
-import com.ikun.train.common.aspect.resp.CommonResp;
+import com.ikun.train.common.resp.CommonResp;
 import com.ikun.train.member.req.MemberRegisterReq;
 import com.ikun.train.member.service.MemberService;
 import jakarta.annotation.Resource;

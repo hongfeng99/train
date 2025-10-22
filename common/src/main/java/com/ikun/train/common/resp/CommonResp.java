@@ -1,4 +1,4 @@
-package com.ikun.train.common.aspect.resp;
+package com.ikun.train.common.resp;
 
 public class CommonResp<T> {
 
