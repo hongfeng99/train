@@ -1,8 +1,10 @@
 package com.ikun.train.member.controller;
 
 import com.ikun.train.common.resp.CommonResp;
+import com.ikun.train.member.req.MemberLoginReq;
 import com.ikun.train.member.req.MemberRegisterReq;
 import com.ikun.train.member.req.MemberSendCodeReq;
+import com.ikun.train.member.resp.MemberLoginResp;
 import com.ikun.train.member.service.MemberService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -35,10 +37,17 @@ public class MemberController {
 //        return commonResp;
         return new CommonResp<>(id);
     }
+
     @PostMapping("/send-code")
     public CommonResp<Long> sendCode(@Valid MemberSendCodeReq req){
         memberService.sendCode(req);
         return new CommonResp<>();
+    }
+
+    @PostMapping("/login")
+    public CommonResp<MemberLoginResp> login(@Valid MemberLoginReq req){
+        MemberLoginResp resp = memberService.login(req);
+        return new CommonResp<>(resp);
     }
 }
 
