@@ -26,7 +26,7 @@ import store from "@/store";
 
 
 export default defineComponent({
-  name: "the-header",
+  name: "the-header-view",
   setup() {
     let member = store.state.member;
 
