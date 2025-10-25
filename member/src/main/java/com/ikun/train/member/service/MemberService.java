@@ -3,9 +3,9 @@ package com.ikun.train.member.service;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.jwt.JWTUtil;
 import com.ikun.train.common.exception.BusinessException;
 import com.ikun.train.common.exception.BusinessExceptionEnum;
+import com.ikun.train.common.util.JwtUtil;
 import com.ikun.train.common.util.SnowUtil;
 import com.ikun.train.member.domain.Member;
 import com.ikun.train.member.domain.MemberExample;
@@ -93,7 +93,7 @@ public class MemberService {
             MemberLoginResp memberLoginResp = BeanUtil.copyProperties(memberDB, MemberLoginResp.class);
             Map<String, Object> map = BeanUtil.beanToMap(memberLoginResp);
             String key = "ikun12306";
-            String token = JWTUtil.createToken(map, key.getBytes());
+            String token = JwtUtil.createToken(memberLoginResp.getId(), memberLoginResp.getMobile());
             memberLoginResp.setToken(token);
             return memberLoginResp;
     }
