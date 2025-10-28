@@ -4,7 +4,7 @@
   <p>
     <a-space>
       <a-button type="primary" @click="handlerQuery()" >刷新</a-button>
-      <a-button type="primary" @click="showModal">新增</a-button>
+      <a-button type="primary" @click="onAdd">新增</a-button>
     </a-space>
   </p>
 
@@ -14,7 +14,18 @@
            :columns="columns"
            :pagination="pagination"
            @change="handleTableChange"
-           :loading="loading"/>
+           :loading="loading">
+    <!--增加编辑乘客按钮    -->
+
+    <template #bodyCell="{ column, record }">
+      <template v-if="column.dataIndex === 'operation'">
+        <a-space>
+          <a @click="onEdit(record)">编辑</a>
+        </a-space>
+      </template>
+    </template>
+
+  </a-table>
   <!-- 新增弹窗 -->
   <a-modal v-model:visible="visible" title="乘车人" @ok="handleOk" ok-text="确认" cancel-text="取消">
     <a-form
@@ -47,7 +58,7 @@
 
 <script>
 //reactive数组重新赋值会失去响应式特性
-import {defineComponent, ref, reactive, onMounted} from 'vue';
+import {defineComponent, ref, onMounted} from 'vue';
 import axios from "axios";
 import {notification} from "ant-design-vue";
 
@@ -56,7 +67,7 @@ export default defineComponent({
 
   setup() {
 
-    const passenger = reactive({
+    let passenger = ref({
       id: undefined,
       memberId: undefined,
       name: undefined,
@@ -66,13 +77,13 @@ export default defineComponent({
       updateTime: undefined,
     });
 
-    const pagination = reactive({
+    const pagination = ref({
       total: 0,
       current: 1,
       pageSize: 6,
     })
 
-    const loading = ref(false)
+    let loading = ref(false)
 
     //声明ref可以直接赋值  reactive直接复制响应式失效，变成普通变量，会发生刷新没数据问题
     let passengers = ref({
@@ -95,14 +106,15 @@ export default defineComponent({
         dataIndex: 'type',
         key: 'type',
       },
+      {
+        title: '操作',
+        dataIndex: 'operation'
+      }
     ]
 
     const visible = ref(false);
-    const showModal = () => {
-      visible.value = true;
-    };
     const handleOk = () => {
-      axios.post("/member/passenger/save", passenger
+      axios.post("/member/passenger/save", passenger.value
       ).then(response =>{
         let data = response.data;
         if(data.success) {
@@ -110,8 +122,8 @@ export default defineComponent({
           visible.value = false;
           //保存成功后进行刷新
           handlerQuery({
-            page: pagination.current,
-            size: pagination.pageSize
+            page: pagination.value.current,
+            size: pagination.value.pageSize
           })
         }else {
           notification.error({description: data.message})
@@ -125,7 +137,7 @@ export default defineComponent({
 
         param = {
           page: 1,
-          size : pagination.pageSize
+          size : pagination.value.pageSize
         }
       }
       //限制刷新次数，通过加载loading
@@ -143,8 +155,8 @@ export default defineComponent({
           passengers.value.list = data.content.list;
 
           //设置分页控件的值   页码切换问题
-          pagination.current = param.page;
-          pagination.total = data.content.total;
+          pagination.value.current = param.page;
+          pagination.value.total = data.content.total;
           // 使用reactive只能push
           // passengers.push(...data.content.list)
         }else{
@@ -152,7 +164,16 @@ export default defineComponent({
         }
       })
     }
-
+    const onAdd = ()=>{
+      //新增表单同时会同步前端的表单的数据，但不会真的提交，每次点击新增表单时清空passenger
+      passenger.value = {};
+      visible.value = true;
+    }
+    const onEdit = (record)=>{
+      visible.value = true;
+      //避免同步更改响应式数据 通过Tool使得使用不是同一个record
+      passenger.value = window.Tool.copy(record)
+    }
     //监听页码事件
     const handleTableChange = (pagination) =>{
       console.log("分页参数"+pagination)
@@ -165,13 +186,12 @@ export default defineComponent({
     onMounted(() => {
       handlerQuery({
         page: 1,
-        size: pagination.pageSize
+        size: pagination.value.pageSize
       })
     })
 
     return {
       visible,
-      showModal,
       handleOk,
       passenger,
       passengers,
@@ -179,7 +199,9 @@ export default defineComponent({
       handlerQuery,
       pagination,
       handleTableChange,
-      loading
+      loading,
+      onAdd,
+      onEdit
     };
   },
 });
