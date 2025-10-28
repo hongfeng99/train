@@ -1,6 +1,8 @@
 package com.ikun.train.member.req;
 
-public class PassengerQueryReq {
+import com.ikun.train.common.req.PageReq;
+
+public class PassengerQueryReq extends PageReq {
 
     private Long memberId;
 
