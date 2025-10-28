@@ -20,7 +20,15 @@
     <template #bodyCell="{ column, record }">
       <template v-if="column.dataIndex === 'operation'">
         <a-space>
+
+          <a-popconfirm
+              title="删除后不可恢复，确认删除?"
+              @confirm="onDelete(record)"
+              ok-text="确认" cancel-text="取消">
+            <a style="color: red">删除</a>
+          </a-popconfirm>
           <a @click="onEdit(record)">编辑</a>
+
         </a-space>
       </template>
     </template>
@@ -80,7 +88,7 @@ export default defineComponent({
     const pagination = ref({
       total: 0,
       current: 1,
-      pageSize: 6,
+      pageSize: 10,
     })
 
     let loading = ref(false)
@@ -174,6 +182,20 @@ export default defineComponent({
       //避免同步更改响应式数据 通过Tool使得使用不是同一个record
       passenger.value = window.Tool.copy(record)
     }
+    const onDelete = (record) => {
+      axios.delete("/member/passenger/delete/" + record.id).then((response) => {
+        const data = response.data;
+        if (data.success) {
+          notification.success({description: "删除成功！"});
+          handlerQuery({
+            page: pagination.value.current,
+            size: pagination.value.pageSize,
+          });
+        } else {
+          notification.error({description: data.message});
+        }
+      });
+    };
     //监听页码事件
     const handleTableChange = (pagination) =>{
       console.log("分页参数"+pagination)
@@ -201,7 +223,8 @@ export default defineComponent({
       handleTableChange,
       loading,
       onAdd,
-      onEdit
+      onEdit,
+      onDelete
     };
   },
 });
