@@ -20,7 +20,6 @@
     <template #bodyCell="{ column, record }">
       <template v-if="column.dataIndex === 'operation'">
         <a-space>
-
           <a-popconfirm
               title="删除后不可恢复，确认删除?"
               @confirm="onDelete(record)"
@@ -28,10 +27,19 @@
             <a style="color: red">删除</a>
           </a-popconfirm>
           <a @click="onEdit(record)">编辑</a>
-
         </a-space>
       </template>
+      <!-- 自定义类型使用template   -->
+      <template v-else-if="column.dataIndex === 'type'">
+        <span v-for="item in PASSENGER_TYPE_ARRAY" :key="item.code">
+<!-- record.type为后端传过来的数据   当前常量与后端比较 相同id显示-->
+          <span v-if="item.code === record.type">
+            {{item.desc}}
+          </span>
+        </span>
+      </template>
     </template>
+
 
   </a-table>
   <!-- 新增弹窗 -->
@@ -55,9 +63,7 @@
 
       <a-form-item label="类型">
         <a-select v-model:value="passenger.type">
-          <a-select-option value="1">成人</a-select-option>
-          <a-select-option value="2">儿童</a-select-option>
-          <a-select-option value="3">学生</a-select-option>
+          <a-select-option v-for="item in PASSENGER_TYPE_ARRAY" :key="item.code" :value="item.code">{{item.desc}}</a-select-option>
         </a-select>
       </a-form-item>
     </a-form>
@@ -74,7 +80,8 @@ export default defineComponent({
   name: "passenger-view",
 
   setup() {
-
+    //将复选跟后端一样申请为枚举或常量
+    const PASSENGER_TYPE_ARRAY = window.PASSENGER_TYPE;
     let passenger = ref({
       id: undefined,
       memberId: undefined,
@@ -176,6 +183,7 @@ export default defineComponent({
       //新增表单同时会同步前端的表单的数据，但不会真的提交，每次点击新增表单时清空passenger
       passenger.value = {};
       visible.value = true;
+
     }
     const onEdit = (record)=>{
       visible.value = true;
@@ -213,6 +221,7 @@ export default defineComponent({
     })
 
     return {
+      PASSENGER_TYPE_ARRAY,
       visible,
       handleOk,
       passenger,
