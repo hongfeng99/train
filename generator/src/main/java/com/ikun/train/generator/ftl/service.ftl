@@ -29,8 +29,6 @@ private static final Logger LOG = LoggerFactory.getLogger(${Domain}Service.class
 
 @Resource
 private ${Domain}Mapper ${domain}Mapper;
-@Autowired
-private PageHelperProperties pageHelperProperties;
 
 public void save(${Domain}SaveReq req){
 DateTime now = DateTime.now();
@@ -61,19 +59,19 @@ public PageResp<${Domain}QueryResp> queryList(${Domain}QueryReq req){
     PageHelper.startPage(req.getPage(),req.getSize());
     List<${Domain}> list = ${domain}Mapper.selectByExample(${domain}Example);
 
-        PageInfo<${Domain}> pageInfo = new PageInfo<>(list);
-            LOG.info("总行数：{}", pageInfo.getTotal());
-            LOG.info("总页数：{}", pageInfo.getPages());
+    PageInfo<${Domain}> pageInfo = new PageInfo<>(list);
+    LOG.info("总行数：{}", pageInfo.getTotal());
+    LOG.info("总页数：{}", pageInfo.getPages());
 
-            List<${Domain}QueryResp> list1 = BeanUtil.copyToList(list, ${Domain}QueryResp.class);
-                PageResp<${Domain}QueryResp> pageResp = new PageResp<>();
-                    pageResp.setList(list1);
-                    pageResp.setTotal(pageInfo.getTotal());
+    List<${Domain}QueryResp> list1 = BeanUtil.copyToList(list, ${Domain}QueryResp.class);
+        PageResp<${Domain}QueryResp> pageResp = new PageResp<>();
+            pageResp.setList(list1);
+            pageResp.setTotal(pageInfo.getTotal());
 
-                    return pageResp;
-                    }
+            return pageResp;
+            }
 
-                    public void delete(Long id){
-                    ${domain}Mapper.deleteByPrimaryKey(id);
-                    }
-                    }
+            public void delete(Long id){
+            ${domain}Mapper.deleteByPrimaryKey(id);
+            }
+            }

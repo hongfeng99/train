@@ -29,8 +29,6 @@ private static final Logger LOG = LoggerFactory.getLogger(PassengerService.class
 
 @Resource
 private PassengerMapper passengerMapper;
-@Autowired
-private PageHelperProperties pageHelperProperties;
 
 public void save(PassengerSaveReq req){
 DateTime now = DateTime.now();
@@ -61,19 +59,19 @@ public PageResp<PassengerQueryResp> queryList(PassengerQueryReq req){
     PageHelper.startPage(req.getPage(),req.getSize());
     List<Passenger> list = passengerMapper.selectByExample(passengerExample);
 
-        PageInfo<Passenger> pageInfo = new PageInfo<>(list);
-            LOG.info("总行数：{}", pageInfo.getTotal());
-            LOG.info("总页数：{}", pageInfo.getPages());
+    PageInfo<Passenger> pageInfo = new PageInfo<>(list);
+    LOG.info("总行数：{}", pageInfo.getTotal());
+    LOG.info("总页数：{}", pageInfo.getPages());
 
-            List<PassengerQueryResp> list1 = BeanUtil.copyToList(list, PassengerQueryResp.class);
-                PageResp<PassengerQueryResp> pageResp = new PageResp<>();
-                    pageResp.setList(list1);
-                    pageResp.setTotal(pageInfo.getTotal());
+    List<PassengerQueryResp> list1 = BeanUtil.copyToList(list, PassengerQueryResp.class);
+        PageResp<PassengerQueryResp> pageResp = new PageResp<>();
+            pageResp.setList(list1);
+            pageResp.setTotal(pageInfo.getTotal());
 
-                    return pageResp;
-                    }
+            return pageResp;
+            }
 
-                    public void delete(Long id){
-                    passengerMapper.deleteByPrimaryKey(id);
-                    }
-                    }
+            public void delete(Long id){
+            passengerMapper.deleteByPrimaryKey(id);
+            }
+            }
