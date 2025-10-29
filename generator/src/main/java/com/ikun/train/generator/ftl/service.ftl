@@ -9,12 +9,12 @@ import com.github.pagehelper.autoconfigure.PageHelperProperties;
 import com.ikun.train.common.context.LoginMemberContext;
 import com.ikun.train.common.resp.PageResp;
 import com.ikun.train.common.util.SnowUtil;
-import com.ikun.train.member.domain.Passenger;
-import com.ikun.train.member.domain.PassengerExample;
-import com.ikun.train.member.mapper.PassengerMapper;
-import com.ikun.train.member.req.PassengerQueryReq;
-import com.ikun.train.member.req.PassengerSaveReq;
-import com.ikun.train.member.resp.PassengerQueryResp;
+import com.ikun.train.member.domain.${Domain};
+import com.ikun.train.member.domain.${Domain}Example;
+import com.ikun.train.member.mapper.${Domain}Mapper;
+import com.ikun.train.member.req.${Domain}QueryReq;
+import com.ikun.train.member.req.${Domain}SaveReq;
+import com.ikun.train.member.resp.${Domain}QueryResp;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,34 +24,34 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class PassengerService {
-private static final Logger LOG = LoggerFactory.getLogger(PassengerService.class);
+public class ${Domain}Service {
+private static final Logger LOG = LoggerFactory.getLogger(${Domain}Service.class);
 
 @Resource
-private PassengerMapper passengerMapper;
+private ${Domain}Mapper ${domain}Mapper;
 @Autowired
 private PageHelperProperties pageHelperProperties;
 
-public void save(PassengerSaveReq req){
+public void save(${Domain}SaveReq req){
 DateTime now = DateTime.now();
-Passenger passenger = BeanUtil.copyProperties(req, Passenger.class);
+${Domain} ${domain} = BeanUtil.copyProperties(req, ${Domain}.class);
 
 if(ObjectUtil.isNull(req.getId())){
-passenger.setMemberId(LoginMemberContext.getId());
-passenger.setId(SnowUtil.getSnowflakeNextId());
-passenger.setCreateTime(now);
-passenger.setUpdateTime(now);
-passengerMapper.insert(passenger);
+${domain}.setMemberId(LoginMemberContext.getId());
+${domain}.setId(SnowUtil.getSnowflakeNextId());
+${domain}.setCreateTime(now);
+${domain}.setUpdateTime(now);
+${domain}Mapper.insert(${domain});
 }else{
-passenger.setUpdateTime(now);
-passengerMapper.updateByPrimaryKey(passenger);
+${domain}.setUpdateTime(now);
+${domain}Mapper.updateByPrimaryKey(${domain});
 }
 }
 
-public PageResp<PassengerQueryResp> queryList(PassengerQueryReq req){
-    PassengerExample passengerExample = new PassengerExample();
-    passengerExample.setOrderByClause("id desc");
-    PassengerExample.Criteria criteria = passengerExample.createCriteria();
+public PageResp<${Domain}QueryResp> queryList(${Domain}QueryReq req){
+    ${Domain}Example ${domain}Example = new ${Domain}Example();
+    ${domain}Example.setOrderByClause("id desc");
+    ${Domain}Example.Criteria criteria = ${domain}Example.createCriteria();
     if(ObjectUtil.isNotEmpty(req.getMemberId())){
     criteria.andMemberIdEqualTo(req.getMemberId());
     }
@@ -59,14 +59,14 @@ public PageResp<PassengerQueryResp> queryList(PassengerQueryReq req){
     LOG.info("查询页码：{}", req.getPage());
     LOG.info("每页条数：{}", req.getSize());
     PageHelper.startPage(req.getPage(),req.getSize());
-    List<Passenger> list = passengerMapper.selectByExample(passengerExample);
+    List<${Domain}> list = ${domain}Mapper.selectByExample(${domain}Example);
 
-        PageInfo<Passenger> pageInfo = new PageInfo<>(list);
+        PageInfo<${Domain}> pageInfo = new PageInfo<>(list);
             LOG.info("总行数：{}", pageInfo.getTotal());
             LOG.info("总页数：{}", pageInfo.getPages());
 
-            List<PassengerQueryResp> list1 = BeanUtil.copyToList(list, PassengerQueryResp.class);
-                PageResp<PassengerQueryResp> pageResp = new PageResp<>();
+            List<${Domain}QueryResp> list1 = BeanUtil.copyToList(list, ${Domain}QueryResp.class);
+                PageResp<${Domain}QueryResp> pageResp = new PageResp<>();
                     pageResp.setList(list1);
                     pageResp.setTotal(pageInfo.getTotal());
 
@@ -74,6 +74,6 @@ public PageResp<PassengerQueryResp> queryList(PassengerQueryReq req){
                     }
 
                     public void delete(Long id){
-                    passengerMapper.deleteByPrimaryKey(id);
+                    ${domain}Mapper.deleteByPrimaryKey(id);
                     }
                     }
