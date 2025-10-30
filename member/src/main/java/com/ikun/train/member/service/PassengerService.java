@@ -5,7 +5,6 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.ObjectUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.ikun.train.common.context.LoginMemberContext;
 import com.ikun.train.common.resp.PageResp;
 import com.ikun.train.common.util.SnowUtil;
 import com.ikun.train.member.domain.Passenger;
@@ -33,7 +32,6 @@ DateTime now = DateTime.now();
 Passenger passenger = BeanUtil.copyProperties(req, Passenger.class);
 
 if(ObjectUtil.isNull(req.getId())){
-passenger.setMemberId(LoginMemberContext.getId());
 passenger.setId(SnowUtil.getSnowflakeNextId());
 passenger.setCreateTime(now);
 passenger.setUpdateTime(now);
@@ -48,9 +46,7 @@ public PageResp<PassengerQueryResp> queryList(PassengerQueryReq req){
     PassengerExample passengerExample = new PassengerExample();
     passengerExample.setOrderByClause("id desc");
     PassengerExample.Criteria criteria = passengerExample.createCriteria();
-    if(ObjectUtil.isNotEmpty(req.getMemberId())){
-    criteria.andMemberIdEqualTo(req.getMemberId());
-    }
+
 
     LOG.info("查询页码：{}", req.getPage());
     LOG.info("每页条数：{}", req.getSize());
@@ -63,13 +59,12 @@ public PageResp<PassengerQueryResp> queryList(PassengerQueryReq req){
 
     List<PassengerQueryResp> list1 = BeanUtil.copyToList(list, PassengerQueryResp.class);
         PageResp<PassengerQueryResp> pageResp = new PageResp<>();
-            pageResp.setList(list1);
-            pageResp.setTotal(pageInfo.getTotal());
+        pageResp.setTotal(pageInfo.getTotal());
+        pageResp.setList(list1);
+        return pageResp;
+    }
 
-            return pageResp;
-            }
-
-            public void delete(Long id){
-            passengerMapper.deleteByPrimaryKey(id);
-            }
-            }
+    public void delete(Long id) {
+        passengerMapper.deleteByPrimaryKey(id);
+    }
+}
