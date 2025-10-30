@@ -1,12 +1,12 @@
-package com.ikun.train.member.controller;
+package com.ikun.train.${module}.controller;
 
 import com.ikun.train.common.context.LoginMemberContext;
 import com.ikun.train.common.resp.CommonResp;
 import com.ikun.train.common.resp.PageResp;
-import com.ikun.train.member.req.${Domain}QueryReq;
-import com.ikun.train.member.req.${Domain}SaveReq;
-import com.ikun.train.member.resp.${Domain}QueryResp;
-import com.ikun.train.member.service.${Domain}Service;
+import com.ikun.train.${module}.req.${Domain}QueryReq;
+import com.ikun.train.${module}.req.${Domain}SaveReq;
+import com.ikun.train.${module}.resp.${Domain}QueryResp;
+import com.ikun.train.${module}.service.${Domain}Service;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
