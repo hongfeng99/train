@@ -1,4 +1,4 @@
-package com.ikun.train.generator.server;
+package com.ikun.train.generator.gen;
 
 import com.ikun.train.generator.util.DbUtil;
 import com.ikun.train.generator.util.Field;
