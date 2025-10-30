@@ -77,17 +77,21 @@ public class ServerGenerator {
 //        param.put("readOnly", readOnly);
         System.out.println("组装参数：" + param);
 
-        gen(Domain, param,"service","service");
-        gen(Domain, param,"controller","controller");
-        gen(Domain, param,"req","saveReq");
+//        gen(Domain, param,"service","service");
+//        gen(Domain, param,"controller","controller");
+//        gen(Domain, param,"req","saveReq");
+//        gen(Domain, param,"req","queryReq");
+        gen(Domain, param,"resp","queryResp");
     }
 
     private static void gen(String Domain, Map<String, Object> param, String packageName, String target) throws IOException, TemplateException {
         // 用模版名初始化模版,target是目标模版不带.ftl以后的名字，比如service,controller
         FreemarkerUtil.initConfig(target + ".ftl");
+        // member/src/main/java/com/ikun/train/member/ + req/
         String toPath = serverPath + packageName + "/";
         new File(toPath).mkdirs();
         String Target = target.substring(0,1).toUpperCase() + target.substring(1);
+        // member/src/main/java/com/ikun/train/member/req/ + Passenger+SaveReq+.java
         String fileName = toPath + Domain + Target + ".java";
         System.out.println("开始生成：" + fileName);
         // 生成文件的最终位置
