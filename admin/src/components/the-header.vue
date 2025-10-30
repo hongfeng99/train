@@ -1,6 +1,10 @@
 <template>
   <a-layout-header class="header">
-    <div class="logo"/>
+    <div class="logo">
+      <router-link to="/welcome" style="color: white; font-size: 18px">
+        12306控台
+      </router-link>
+    </div>
     <div style="float: right;color: white">
       欢迎使用管理控台！
     </div>
@@ -29,7 +33,6 @@
 
 <script>
 import {defineComponent, ref, watch} from "vue";
-import store from "@/store";
 import router from "@/router";
 
 
@@ -50,6 +53,14 @@ export default defineComponent({
 });
 </script>
 
-<style scoped>
 
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped>
+.logo {
+  float: left;
+  height: 31px;
+  width: 150px;
+  color: white;
+  font-size: 20px;
+}
 </style>
