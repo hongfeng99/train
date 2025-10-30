@@ -5,6 +5,7 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.ObjectUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.ikun.train.common.context.LoginMemberContext;
 import com.ikun.train.common.resp.PageResp;
 import com.ikun.train.common.util.SnowUtil;
 import com.ikun.train.member.domain.Passenger;
@@ -32,7 +33,8 @@ DateTime now = DateTime.now();
 Passenger passenger = BeanUtil.copyProperties(req, Passenger.class);
 
 if(ObjectUtil.isNull(req.getId())){
-passenger.setId(SnowUtil.getSnowflakeNextId());
+    passenger.setMemberId(LoginMemberContext.getId());
+    passenger.setId(SnowUtil.getSnowflakeNextId());
 passenger.setCreateTime(now);
 passenger.setUpdateTime(now);
 passengerMapper.insert(passenger);
