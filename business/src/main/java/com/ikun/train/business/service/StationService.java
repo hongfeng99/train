@@ -22,42 +22,42 @@ import java.util.List;
 
 @Service
 public class StationService {
-private static final Logger LOG = LoggerFactory.getLogger(StationService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(StationService.class);
 
-@Resource
-private StationMapper stationMapper;
+    @Resource
+    private StationMapper stationMapper;
 
-public void save(StationSaveReq req){
-DateTime now = DateTime.now();
-Station station = BeanUtil.copyProperties(req, Station.class);
+    public void save(StationSaveReq req) {
+        DateTime now = DateTime.now();
+        Station station = BeanUtil.copyProperties(req, Station.class);
 
-if(ObjectUtil.isNull(req.getId())){
-station.setId(SnowUtil.getSnowflakeNextId());
-station.setCreateTime(now);
-station.setUpdateTime(now);
-stationMapper.insert(station);
-}else{
-station.setUpdateTime(now);
-stationMapper.updateByPrimaryKey(station);
-}
-}
+        if (ObjectUtil.isNull(req.getId())) {
+            station.setId(SnowUtil.getSnowflakeNextId());
+            station.setCreateTime(now);
+            station.setUpdateTime(now);
+            stationMapper.insert(station);
+        } else {
+            station.setUpdateTime(now);
+            stationMapper.updateByPrimaryKey(station);
+        }
+    }
 
-public PageResp<StationQueryResp> queryList(StationQueryReq req){
-    StationExample stationExample = new StationExample();
-    stationExample.setOrderByClause("id desc");
-    StationExample.Criteria criteria = stationExample.createCriteria();
+    public PageResp<StationQueryResp> queryList(StationQueryReq req) {
+        StationExample stationExample = new StationExample();
+        stationExample.setOrderByClause("id desc");
+        StationExample.Criteria criteria = stationExample.createCriteria();
 
 
-    LOG.info("查询页码：{}", req.getPage());
-    LOG.info("每页条数：{}", req.getSize());
-    PageHelper.startPage(req.getPage(),req.getSize());
-    List<Station> list = stationMapper.selectByExample(stationExample);
+        LOG.info("查询页码：{}", req.getPage());
+        LOG.info("每页条数：{}", req.getSize());
+        PageHelper.startPage(req.getPage(), req.getSize());
+        List<Station> list = stationMapper.selectByExample(stationExample);
 
-    PageInfo<Station> pageInfo = new PageInfo<>(list);
-    LOG.info("总行数：{}", pageInfo.getTotal());
-    LOG.info("总页数：{}", pageInfo.getPages());
+        PageInfo<Station> pageInfo = new PageInfo<>(list);
+        LOG.info("总行数：{}", pageInfo.getTotal());
+        LOG.info("总页数：{}", pageInfo.getPages());
 
-    List<StationQueryResp> list1 = BeanUtil.copyToList(list, StationQueryResp.class);
+        List<StationQueryResp> list1 = BeanUtil.copyToList(list, StationQueryResp.class);
         PageResp<StationQueryResp> pageResp = new PageResp<>();
         pageResp.setTotal(pageInfo.getTotal());
         pageResp.setList(list1);
@@ -66,5 +66,12 @@ public PageResp<StationQueryResp> queryList(StationQueryReq req){
 
     public void delete(Long id) {
         stationMapper.deleteByPrimaryKey(id);
+    }
+
+    public List<StationQueryResp> queryAll(){
+        StationExample stationExample = new StationExample();
+        stationExample.setOrderByClause("name_pinyin asc");
+        List<Station> list = stationMapper.selectByExample(stationExample);
+        return BeanUtil.copyToList(list, StationQueryResp.class);
     }
 }
