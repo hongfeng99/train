@@ -67,4 +67,11 @@ public PageResp<TrainQueryResp> queryList(TrainQueryReq req){
     public void delete(Long id) {
         trainMapper.deleteByPrimaryKey(id);
     }
+
+public List<TrainQueryResp> queryAll(){
+    TrainExample trainExample = new TrainExample();
+    trainExample.setOrderByClause("code desc");
+    List<Train> list = trainMapper.selectByExample(trainExample);
+    return BeanUtil.copyToList(list, TrainQueryResp.class);
+    }
 }
