@@ -22,42 +22,44 @@ import java.util.List;
 
 @Service
 public class TrainCarriageService {
-private static final Logger LOG = LoggerFactory.getLogger(TrainCarriageService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TrainCarriageService.class);
 
-@Resource
-private TrainCarriageMapper trainCarriageMapper;
+    @Resource
+    private TrainCarriageMapper trainCarriageMapper;
 
-public void save(TrainCarriageSaveReq req){
-DateTime now = DateTime.now();
-TrainCarriage trainCarriage = BeanUtil.copyProperties(req, TrainCarriage.class);
+    public void save(TrainCarriageSaveReq req) {
+        DateTime now = DateTime.now();
+        TrainCarriage trainCarriage = BeanUtil.copyProperties(req, TrainCarriage.class);
 
-if(ObjectUtil.isNull(req.getId())){
-trainCarriage.setId(SnowUtil.getSnowflakeNextId());
-trainCarriage.setCreateTime(now);
-trainCarriage.setUpdateTime(now);
-trainCarriageMapper.insert(trainCarriage);
-}else{
-trainCarriage.setUpdateTime(now);
-trainCarriageMapper.updateByPrimaryKey(trainCarriage);
-}
-}
+        if (ObjectUtil.isNull(req.getId())) {
+            trainCarriage.setId(SnowUtil.getSnowflakeNextId());
+            trainCarriage.setCreateTime(now);
+            trainCarriage.setUpdateTime(now);
+            trainCarriageMapper.insert(trainCarriage);
+        } else {
+            trainCarriage.setUpdateTime(now);
+            trainCarriageMapper.updateByPrimaryKey(trainCarriage);
+        }
+    }
 
-public PageResp<TrainCarriageQueryResp> queryList(TrainCarriageQueryReq req){
-    TrainCarriageExample trainCarriageExample = new TrainCarriageExample();
-    trainCarriageExample.setOrderByClause("id desc");
-    TrainCarriageExample.Criteria criteria = trainCarriageExample.createCriteria();
+    public PageResp<TrainCarriageQueryResp> queryList(TrainCarriageQueryReq req) {
+        TrainCarriageExample trainCarriageExample = new TrainCarriageExample();
+        trainCarriageExample.setOrderByClause("train_code asc, `index` asc");
+        TrainCarriageExample.Criteria criteria = trainCarriageExample.createCriteria();
+        if(ObjectUtil.isNotEmpty(req.getTrainCode())){
+            criteria.andTrainCodeEqualTo(req.getTrainCode());
+        }
 
+        LOG.info("查询页码：{}", req.getPage());
+        LOG.info("每页条数：{}", req.getSize());
+        PageHelper.startPage(req.getPage(), req.getSize());
+        List<TrainCarriage> list = trainCarriageMapper.selectByExample(trainCarriageExample);
 
-    LOG.info("查询页码：{}", req.getPage());
-    LOG.info("每页条数：{}", req.getSize());
-    PageHelper.startPage(req.getPage(),req.getSize());
-    List<TrainCarriage> list = trainCarriageMapper.selectByExample(trainCarriageExample);
+        PageInfo<TrainCarriage> pageInfo = new PageInfo<>(list);
+        LOG.info("总行数：{}", pageInfo.getTotal());
+        LOG.info("总页数：{}", pageInfo.getPages());
 
-    PageInfo<TrainCarriage> pageInfo = new PageInfo<>(list);
-    LOG.info("总行数：{}", pageInfo.getTotal());
-    LOG.info("总页数：{}", pageInfo.getPages());
-
-    List<TrainCarriageQueryResp> list1 = BeanUtil.copyToList(list, TrainCarriageQueryResp.class);
+        List<TrainCarriageQueryResp> list1 = BeanUtil.copyToList(list, TrainCarriageQueryResp.class);
         PageResp<TrainCarriageQueryResp> pageResp = new PageResp<>();
         pageResp.setTotal(pageInfo.getTotal());
         pageResp.setList(list1);
