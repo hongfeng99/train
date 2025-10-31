@@ -70,7 +70,7 @@ public PageResp<TrainQueryResp> queryList(TrainQueryReq req){
 
 public List<TrainQueryResp> queryAll(){
     TrainExample trainExample = new TrainExample();
-    trainExample.setOrderByClause("code desc");
+    trainExample.setOrderByClause("code asc");
     List<Train> list = trainMapper.selectByExample(trainExample);
     return BeanUtil.copyToList(list, TrainQueryResp.class);
     }
