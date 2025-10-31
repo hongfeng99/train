@@ -1,0 +1,12 @@
+package com.ikun.train.business.req;
+
+import com.ikun.train.common.req.PageReq;
+
+public class TrainCarriageQueryReq extends PageReq {
+
+    @Override
+    public String toString() {
+        return "TrainCarriageQueryReq{" +
+                "} " + super.toString();
+    }
+}
