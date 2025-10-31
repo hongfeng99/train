@@ -1,4 +1,4 @@
-package com.ikun.train.business.controller;
+package com.ikun.train.business.controller.admin;
 
 import com.ikun.train.common.context.LoginMemberContext;
 import com.ikun.train.common.resp.CommonResp;
@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("/station")
-public class StationController {
+@RequestMapping("/admin/station")
+public class StationAdminController {
 
     @Resource
     private StationService stationService;

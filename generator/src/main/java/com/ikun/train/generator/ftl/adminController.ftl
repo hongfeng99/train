@@ -1,4 +1,4 @@
-package com.ikun.train.${module}.controller;
+package com.ikun.train.${module}.controller.admin;
 
 import com.ikun.train.common.context.LoginMemberContext;
 import com.ikun.train.common.resp.CommonResp;
@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("/${do_main}")
-public class ${Domain}Controller {
+@RequestMapping("/admin/${do_main}")
+public class ${Domain}AdminController {
 
     @Resource
     private ${Domain}Service ${domain}Service;
