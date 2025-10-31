@@ -41,7 +41,7 @@
                              targetPackage="com.ikun.train.business.mapper"
                              type="XMLMAPPER"/>
 
-                <table tableName="station" domainObjectName="Station"/>
-        <!--<table tableName="ticket" domainObjectName="Ticket"/>-->
+<!--                <table tableName="station" domainObjectName="Station"/>-->
+        <table tableName="train" domainObjectName="Train"/>
     </context>
 </generatorConfiguration>
