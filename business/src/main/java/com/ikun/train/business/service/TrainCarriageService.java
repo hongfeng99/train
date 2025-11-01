@@ -5,14 +5,15 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.ObjectUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.ikun.train.common.resp.PageResp;
-import com.ikun.train.common.util.SnowUtil;
 import com.ikun.train.business.domain.TrainCarriage;
 import com.ikun.train.business.domain.TrainCarriageExample;
+import com.ikun.train.business.enums.SeatColEnum;
 import com.ikun.train.business.mapper.TrainCarriageMapper;
 import com.ikun.train.business.req.TrainCarriageQueryReq;
 import com.ikun.train.business.req.TrainCarriageSaveReq;
 import com.ikun.train.business.resp.TrainCarriageQueryResp;
+import com.ikun.train.common.resp.PageResp;
+import com.ikun.train.common.util.SnowUtil;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +30,12 @@ public class TrainCarriageService {
 
     public void save(TrainCarriageSaveReq req) {
         DateTime now = DateTime.now();
+        // 自动计算出列数和总座位数
+        List<SeatColEnum> seatColEnums = SeatColEnum.getColsByType(req.getSeatType());
+        req.setColCount(seatColEnums.size());
+        req.setSeatCount(req.getColCount() * req.getRowCount());
+
+
         TrainCarriage trainCarriage = BeanUtil.copyProperties(req, TrainCarriage.class);
 
         if (ObjectUtil.isNull(req.getId())) {
