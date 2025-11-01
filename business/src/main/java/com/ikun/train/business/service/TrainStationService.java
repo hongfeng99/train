@@ -1,18 +1,21 @@
 package com.ikun.train.business.service;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.ObjectUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.ikun.train.common.resp.PageResp;
-import com.ikun.train.common.util.SnowUtil;
 import com.ikun.train.business.domain.TrainStation;
 import com.ikun.train.business.domain.TrainStationExample;
 import com.ikun.train.business.mapper.TrainStationMapper;
 import com.ikun.train.business.req.TrainStationQueryReq;
 import com.ikun.train.business.req.TrainStationSaveReq;
 import com.ikun.train.business.resp.TrainStationQueryResp;
+import com.ikun.train.common.exception.BusinessException;
+import com.ikun.train.common.exception.BusinessExceptionEnum;
+import com.ikun.train.common.resp.PageResp;
+import com.ikun.train.common.util.SnowUtil;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +35,19 @@ public class TrainStationService {
         TrainStation trainStation = BeanUtil.copyProperties(req, TrainStation.class);
 
         if (ObjectUtil.isNull(req.getId())) {
+
+
+            // 保存之前，先校验唯一键是否存在
+            TrainStation trainStationDB = selectByUnique(req.getTrainCode(), req.getIndex());
+            if (ObjectUtil.isNotEmpty(trainStationDB)) {
+                throw new BusinessException(BusinessExceptionEnum.BUSINESS_TRAIN_STATION_INDEX_UNIQUE_ERROR);
+            }
+             trainStationDB = selectByUnique(req.getTrainCode(), req.getName());
+            if (ObjectUtil.isNotEmpty(trainStationDB)) {
+                throw new BusinessException(BusinessExceptionEnum.BUSINESS_TRAIN_STATION_NAME_UNIQUE_ERROR);
+            }
+
+
             trainStation.setId(SnowUtil.getSnowflakeNextId());
             trainStation.setCreateTime(now);
             trainStation.setUpdateTime(now);
@@ -42,11 +58,37 @@ public class TrainStationService {
         }
     }
 
+    private TrainStation selectByUnique(String trainCode, Integer index) {
+        TrainStationExample stationExample = new TrainStationExample();
+        stationExample.createCriteria()
+                .andTrainCodeEqualTo(trainCode)
+                .andIndexEqualTo(index);
+        List<TrainStation> list = trainStationMapper.selectByExample(stationExample);
+        if (CollUtil.isNotEmpty(list)) {
+            return list.get(0);
+        } else {
+            return null;
+        }
+    }
+
+    private TrainStation selectByUnique(String trainCode, String name) {
+        TrainStationExample stationExample = new TrainStationExample();
+        stationExample.createCriteria()
+                .andTrainCodeEqualTo(trainCode)
+                .andNameEqualTo(name);
+        List<TrainStation> list = trainStationMapper.selectByExample(stationExample);
+        if (CollUtil.isNotEmpty(list)) {
+            return list.get(0);
+        } else {
+            return null;
+        }
+    }
+
     public PageResp<TrainStationQueryResp> queryList(TrainStationQueryReq req) {
         TrainStationExample trainStationExample = new TrainStationExample();
         trainStationExample.setOrderByClause("train_code asc, `index` asc");
         TrainStationExample.Criteria criteria = trainStationExample.createCriteria();
-        if(ObjectUtil.isNotEmpty(req.getTrainCode())){
+        if (ObjectUtil.isNotEmpty(req.getTrainCode())) {
             criteria.andTrainCodeEqualTo(req.getTrainCode());
         }
 

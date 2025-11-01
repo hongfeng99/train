@@ -1,6 +1,7 @@
 package com.ikun.train.business.service;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.ObjectUtil;
 import com.github.pagehelper.PageHelper;
@@ -12,6 +13,8 @@ import com.ikun.train.business.mapper.TrainCarriageMapper;
 import com.ikun.train.business.req.TrainCarriageQueryReq;
 import com.ikun.train.business.req.TrainCarriageSaveReq;
 import com.ikun.train.business.resp.TrainCarriageQueryResp;
+import com.ikun.train.common.exception.BusinessException;
+import com.ikun.train.common.exception.BusinessExceptionEnum;
 import com.ikun.train.common.resp.PageResp;
 import com.ikun.train.common.util.SnowUtil;
 import jakarta.annotation.Resource;
@@ -39,6 +42,14 @@ public class TrainCarriageService {
         TrainCarriage trainCarriage = BeanUtil.copyProperties(req, TrainCarriage.class);
 
         if (ObjectUtil.isNull(req.getId())) {
+
+            // 保存之前，先校验唯一键是否存在
+            TrainCarriage trainCarriageDB = selectByUnique(req.getTrainCode(), req.getIndex());
+            if (ObjectUtil.isNotEmpty(trainCarriageDB)) {
+                throw new BusinessException(BusinessExceptionEnum.BUSINESS_TRAIN_CARRIAGE_INDEX_UNIQUE_ERROR);
+            }
+
+
             trainCarriage.setId(SnowUtil.getSnowflakeNextId());
             trainCarriage.setCreateTime(now);
             trainCarriage.setUpdateTime(now);
@@ -49,11 +60,24 @@ public class TrainCarriageService {
         }
     }
 
+    private TrainCarriage selectByUnique(String trainCode, Integer index) {
+        TrainCarriageExample stationExample = new TrainCarriageExample();
+        stationExample.createCriteria()
+                .andTrainCodeEqualTo(trainCode)
+                .andIndexEqualTo(index);
+        List<TrainCarriage> list = trainCarriageMapper.selectByExample(stationExample);
+        if (CollUtil.isNotEmpty(list)) {
+            return list.get(0);
+        } else {
+            return null;
+        }
+    }
+
     public PageResp<TrainCarriageQueryResp> queryList(TrainCarriageQueryReq req) {
         TrainCarriageExample trainCarriageExample = new TrainCarriageExample();
         trainCarriageExample.setOrderByClause("train_code asc, `index` asc");
         TrainCarriageExample.Criteria criteria = trainCarriageExample.createCriteria();
-        if(ObjectUtil.isNotEmpty(req.getTrainCode())){
+        if (ObjectUtil.isNotEmpty(req.getTrainCode())) {
             criteria.andTrainCodeEqualTo(req.getTrainCode());
         }
 

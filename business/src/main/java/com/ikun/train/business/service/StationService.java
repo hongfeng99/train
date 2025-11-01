@@ -63,6 +63,7 @@ public class StationService {
             return null;
         }
     }
+
     public PageResp<StationQueryResp> queryList(StationQueryReq req) {
         StationExample stationExample = new StationExample();
         stationExample.setOrderByClause("id desc");
@@ -89,7 +90,7 @@ public class StationService {
         stationMapper.deleteByPrimaryKey(id);
     }
 
-    public List<StationQueryResp> queryAll(){
+    public List<StationQueryResp> queryAll() {
         StationExample stationExample = new StationExample();
         stationExample.setOrderByClause("name_pinyin asc");
         List<Station> list = stationMapper.selectByExample(stationExample);
