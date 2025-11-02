@@ -22,42 +22,48 @@ import java.util.List;
 
 @Service
 public class DailyTrainStationService {
-private static final Logger LOG = LoggerFactory.getLogger(DailyTrainStationService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DailyTrainStationService.class);
 
-@Resource
-private DailyTrainStationMapper dailyTrainStationMapper;
+    @Resource
+    private DailyTrainStationMapper dailyTrainStationMapper;
 
-public void save(DailyTrainStationSaveReq req){
-DateTime now = DateTime.now();
-DailyTrainStation dailyTrainStation = BeanUtil.copyProperties(req, DailyTrainStation.class);
+    public void save(DailyTrainStationSaveReq req) {
+        DateTime now = DateTime.now();
+        DailyTrainStation dailyTrainStation = BeanUtil.copyProperties(req, DailyTrainStation.class);
 
-if(ObjectUtil.isNull(req.getId())){
-dailyTrainStation.setId(SnowUtil.getSnowflakeNextId());
-dailyTrainStation.setCreateTime(now);
-dailyTrainStation.setUpdateTime(now);
-dailyTrainStationMapper.insert(dailyTrainStation);
-}else{
-dailyTrainStation.setUpdateTime(now);
-dailyTrainStationMapper.updateByPrimaryKey(dailyTrainStation);
-}
-}
+        if (ObjectUtil.isNull(req.getId())) {
+            dailyTrainStation.setId(SnowUtil.getSnowflakeNextId());
+            dailyTrainStation.setCreateTime(now);
+            dailyTrainStation.setUpdateTime(now);
+            dailyTrainStationMapper.insert(dailyTrainStation);
+        } else {
+            dailyTrainStation.setUpdateTime(now);
+            dailyTrainStationMapper.updateByPrimaryKey(dailyTrainStation);
+        }
+    }
 
-public PageResp<DailyTrainStationQueryResp> queryList(DailyTrainStationQueryReq req){
-    DailyTrainStationExample dailyTrainStationExample = new DailyTrainStationExample();
-    dailyTrainStationExample.setOrderByClause("id desc");
-    DailyTrainStationExample.Criteria criteria = dailyTrainStationExample.createCriteria();
+    public PageResp<DailyTrainStationQueryResp> queryList(DailyTrainStationQueryReq req) {
+        DailyTrainStationExample dailyTrainStationExample = new DailyTrainStationExample();
+        dailyTrainStationExample.setOrderByClause("date desc, train_code asc, `index` asc");
+        DailyTrainStationExample.Criteria criteria = dailyTrainStationExample.createCriteria();
+        if (ObjectUtil.isNotNull(req.getDate())) {
+            criteria.andDateEqualTo(req.getDate());
+        }
+        if (ObjectUtil.isNotEmpty(req.getTrainCode())) {
+            criteria.andTrainCodeEqualTo(req.getTrainCode());
+        }
 
 
-    LOG.info("查询页码：{}", req.getPage());
-    LOG.info("每页条数：{}", req.getSize());
-    PageHelper.startPage(req.getPage(),req.getSize());
-    List<DailyTrainStation> list = dailyTrainStationMapper.selectByExample(dailyTrainStationExample);
+        LOG.info("查询页码：{}", req.getPage());
+        LOG.info("每页条数：{}", req.getSize());
+        PageHelper.startPage(req.getPage(), req.getSize());
+        List<DailyTrainStation> list = dailyTrainStationMapper.selectByExample(dailyTrainStationExample);
 
-    PageInfo<DailyTrainStation> pageInfo = new PageInfo<>(list);
-    LOG.info("总行数：{}", pageInfo.getTotal());
-    LOG.info("总页数：{}", pageInfo.getPages());
+        PageInfo<DailyTrainStation> pageInfo = new PageInfo<>(list);
+        LOG.info("总行数：{}", pageInfo.getTotal());
+        LOG.info("总页数：{}", pageInfo.getPages());
 
-    List<DailyTrainStationQueryResp> list1 = BeanUtil.copyToList(list, DailyTrainStationQueryResp.class);
+        List<DailyTrainStationQueryResp> list1 = BeanUtil.copyToList(list, DailyTrainStationQueryResp.class);
         PageResp<DailyTrainStationQueryResp> pageResp = new PageResp<>();
         pageResp.setTotal(pageInfo.getTotal());
         pageResp.setList(list1);
