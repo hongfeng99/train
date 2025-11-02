@@ -5,12 +5,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.env.Environment;
 
 @SpringBootApplication
 @ComponentScan("com.ikun")
 @MapperScan("com.ikun.train.*.mapper")
+@EnableFeignClients("com.ikun.train.batch.feign")
 public class BatchApplication {
 
 
