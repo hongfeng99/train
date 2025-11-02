@@ -15,7 +15,7 @@ import java.util.*;
 
 
 public class ServerGenerator {
-    static boolean readOnly = false;
+    static boolean readOnly = true;
     static String vuePath = "admin/src/views/main/";
     // serverPath是目标生成的父文件夹位置
     static String serverPath = "[module]/src/main/java/com/ikun/train/[module]/";
