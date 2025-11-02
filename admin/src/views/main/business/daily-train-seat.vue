@@ -1,6 +1,7 @@
 <template>
   <p>
     <a-space>
+      <train-select-view v-model="params.trainCode" width="200px"></train-select-view>
       <a-button type="primary" @click="handleQuery()">刷新</a-button>
       
     </a-space>
@@ -15,7 +16,7 @@
       </template>
       <template v-else-if="column.dataIndex === 'col'">
         <span v-for="item in SEAT_COL_ARRAY" :key="item.code">
-          <span v-if="item.code === record.col">
+          <span v-if="item.code === record.col && item.type === record.seatType">
             {{item.desc}}
           </span>
         </span>
@@ -35,9 +36,11 @@
 import { defineComponent, ref, onMounted } from 'vue';
 import {notification} from "ant-design-vue";
 import axios from "axios";
+import TrainSelectView from "@/components/train-select.vue";
 
 export default defineComponent({
   name: "daily-train-seat-view",
+  components: {TrainSelectView},
   setup() {
     const SEAT_COL_ARRAY = window.SEAT_COL_ARRAY;
     const SEAT_TYPE_ARRAY = window.SEAT_TYPE_ARRAY;
@@ -63,6 +66,9 @@ export default defineComponent({
       pageSize: 10,
     });
     let loading = ref(false);
+    let params = ref({
+      trainCode: null
+    });
     const columns = [
     {
       title: '日期',
@@ -161,6 +167,7 @@ export default defineComponent({
       handleTableChange,
       handleQuery,
       loading,
+      params
     };
   },
 });
