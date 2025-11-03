@@ -86,6 +86,7 @@ public class DailyTrainSeatService {
 
         // 删除该车次当日的座位数据
         DailyTrainSeatExample dailyTrainSeatExample = new DailyTrainSeatExample();
+        dailyTrainSeatExample.setOrderByClause("date desc, train_code asc, carriage asc");
         dailyTrainSeatExample.createCriteria().andTrainCodeEqualTo(trainCode);
         dailyTrainSeatMapper.deleteByExample(dailyTrainSeatExample);
 
