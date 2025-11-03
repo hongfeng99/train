@@ -39,6 +39,8 @@ public class DailyTrainService {
     private DailyTrainStationService dailyTrainStationService;
     @Autowired
     private DailyTrainCarriageService dailyTrainCarriageService;
+    @Autowired
+    private DailyTrainSeatService dailyTrainSeatService;
 
     public void save(DailyTrainSaveReq req) {
         DateTime now = DateTime.now();
@@ -127,5 +129,10 @@ public class DailyTrainService {
         // 生成该车次当日的车厢数据
         dailyTrainCarriageService.genDaily(date,train.getCode());
         LOG.info("开始生成日期为【{}】，车次为【{}】的车厢数据",DateUtil.formatDate(date),train.getCode());
+
+        // 生成该车次当日的车座数据
+        dailyTrainSeatService.genDaily(date,train.getCode());
+        LOG.info("开始生成日期为【{}】，车次为【{}】的车座数据",DateUtil.formatDate(date),train.getCode());
+
     }
 }
