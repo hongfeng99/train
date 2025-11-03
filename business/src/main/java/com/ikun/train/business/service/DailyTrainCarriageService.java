@@ -1,13 +1,16 @@
 package com.ikun.train.business.service;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.ikun.train.business.domain.DailyTrainCarriage;
 import com.ikun.train.business.domain.DailyTrainCarriageExample;
+import com.ikun.train.business.domain.TrainCarriage;
 import com.ikun.train.business.enums.SeatColEnum;
 import com.ikun.train.business.mapper.DailyTrainCarriageMapper;
 import com.ikun.train.business.req.DailyTrainCarriageQueryReq;
@@ -18,8 +21,10 @@ import com.ikun.train.common.util.SnowUtil;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -28,6 +33,8 @@ public class DailyTrainCarriageService {
 
     @Resource
     private DailyTrainCarriageMapper dailyTrainCarriageMapper;
+    @Autowired
+    private TrainCarriageService trainCarriageService;
 
     public void save(DailyTrainCarriageSaveReq req) {
         DateTime now = DateTime.now();
@@ -80,4 +87,31 @@ public class DailyTrainCarriageService {
     public void delete(Long id) {
         dailyTrainCarriageMapper.deleteByPrimaryKey(id);
     }
+
+    public void genDaily(Date date, String trainCode){
+
+        // 删除该日该车次对应的车厢数据
+        DailyTrainCarriageExample dailyTrainCarriageExample = new DailyTrainCarriageExample();
+        dailyTrainCarriageExample.createCriteria().andDateEqualTo(date).andTrainCodeEqualTo(trainCode);
+        dailyTrainCarriageMapper.deleteByExample(dailyTrainCarriageExample);
+
+        // 生成该日该车次对应的车厢数据
+        DateTime now = DateTime.now();
+        LOG.info("开始生成日期为【{}】，车次为【{}】的车厢数据", DateUtil.formatDate(date),trainCode);
+        List<TrainCarriage> trainCarriages = trainCarriageService.selectByTrainCode(trainCode);
+        if(CollUtil.isEmpty(trainCarriages)){
+            LOG.info("该车次没有车厢基础数据，结束");
+        }
+
+        for (TrainCarriage trainCarriage:trainCarriages){
+            DailyTrainCarriage dailyTrainCarriage = BeanUtil.copyProperties(trainCarriage, DailyTrainCarriage.class);
+            dailyTrainCarriage.setCreateTime(now);
+            dailyTrainCarriage.setUpdateTime(now);
+            dailyTrainCarriage.setId(SnowUtil.getSnowflakeNextId());
+            dailyTrainCarriage.setDate(date);
+            dailyTrainCarriageMapper.insert(dailyTrainCarriage);
+        }
+
+    }
+
 }
