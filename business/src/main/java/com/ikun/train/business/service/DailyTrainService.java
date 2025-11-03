@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -41,6 +42,8 @@ public class DailyTrainService {
     private DailyTrainCarriageService dailyTrainCarriageService;
     @Autowired
     private DailyTrainSeatService dailyTrainSeatService;
+    @Autowired
+    private DailyTrainTicketService dailyTrainTicketService;
 
     public void save(DailyTrainSaveReq req) {
         DateTime now = DateTime.now();
@@ -105,7 +108,8 @@ public class DailyTrainService {
 
     }
 
-    private void genDailyTrain(Date date, Train train) {
+    @Transactional
+    protected void genDailyTrain(Date date, Train train) {
         // 删除该车次已有数据
         DailyTrainExample dailyTrainExample = new DailyTrainExample();
         dailyTrainExample.createCriteria()
@@ -132,6 +136,10 @@ public class DailyTrainService {
 
         // 生成该车次当日的车座数据
         dailyTrainSeatService.genDaily(date,train.getCode());
+        LOG.info("开始生成日期为【{}】，车次为【{}】的车座数据",DateUtil.formatDate(date),train.getCode());
+
+        // 生成该车次当日的车票数据
+        dailyTrainTicketService.genDaily(date,train.getCode());
         LOG.info("开始生成日期为【{}】，车次为【{}】的车座数据",DateUtil.formatDate(date),train.getCode());
 
     }

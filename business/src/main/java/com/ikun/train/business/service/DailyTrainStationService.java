@@ -20,6 +20,7 @@ import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -81,6 +82,7 @@ public class DailyTrainStationService {
         dailyTrainStationMapper.deleteByPrimaryKey(id);
     }
 
+    @Transactional
     public void genDaily(Date date, String trainCode) {
         LOG.info("开始生成日期为【{}】，车次为【{}】的车站信息", DateUtil.formatDate(date),trainCode);
 
