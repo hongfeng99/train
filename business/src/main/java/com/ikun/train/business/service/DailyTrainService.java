@@ -139,7 +139,7 @@ public class DailyTrainService {
         LOG.info("开始生成日期为【{}】，车次为【{}】的车座数据",DateUtil.formatDate(date),train.getCode());
 
         // 生成该车次当日的车票数据
-        dailyTrainTicketService.genDaily(date,train.getCode());
+        dailyTrainTicketService.genDaily(dailyTrain, date,train.getCode());
         LOG.info("开始生成日期为【{}】，车次为【{}】的车座数据",DateUtil.formatDate(date),train.getCode());
 
     }
