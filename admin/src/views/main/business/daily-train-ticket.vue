@@ -17,16 +17,69 @@
     <template #bodyCell="{ column, record }">
       <template v-if="column.dataIndex === 'operation'">
       </template>
+      <template v-else-if="column.dataIndex === 'station'">
+        {{record.start}}<br/>
+        {{record.end}}
+      </template>
+      <template v-else-if="column.dataIndex === 'time'">
+        {{record.startTime}}<br/>
+        {{record.endTime}}
+      </template>
+      <template v-else-if="column.dataIndex === 'duration'">
+        {{calDuration(record.startTime, record.endTime)}}<br/>
+        <div v-if="record.startTime.replaceAll(':', '') >= record.endTime.replaceAll(':', '')">
+          次日到达
+        </div>
+        <div v-else>
+          当日到达
+        </div>
+      </template>
+      <template v-else-if="column.dataIndex === 'ydz'">
+        <div v-if="record.ydz >= 0">
+          {{record.ydz}}<br/>
+          {{record.ydzPrice}}￥
+        </div>
+        <div v-else>
+          --
+        </div>
+      </template>
+      <template v-else-if="column.dataIndex === 'edz'">
+        <div v-if="record.edz >= 0">
+          {{record.edz}}<br/>
+          {{record.edzPrice}}￥
+        </div>
+        <div v-else>
+          --
+        </div>
+      </template>
+      <template v-else-if="column.dataIndex === 'rw'">
+        <div v-if="record.rw >= 0">
+          {{record.rw}}<br/>
+          {{record.rwPrice}}￥
+        </div>
+        <div v-else>
+          --
+        </div>
+      </template>
+      <template v-else-if="column.dataIndex === 'yw'">
+        <div v-if="record.yw >= 0">
+          {{record.yw}}<br/>
+          {{record.ywPrice}}￥
+        </div>
+        <div v-else>
+          --
+        </div>
+      </template>
     </template>
   </a-table>
 </template>
-
 <script>
 import { defineComponent, ref, onMounted } from 'vue';
 import {notification} from "ant-design-vue";
 import axios from "axios";
 import TrainSelectView from "@/components/train-select";
 import StationSelectView from "@/components/station-select";
+import dayjs from "dayjs";
 
 export default defineComponent({
   name: "daily-train-ticket-view",
@@ -76,7 +129,39 @@ export default defineComponent({
       dataIndex: 'trainCode',
       key: 'trainCode',
     },
-    {
+      {
+        title: '车站',
+        dataIndex: 'station',
+      },
+      {
+        title: '时间',
+        dataIndex: 'time',
+      },
+      {
+        title: '历时',
+        dataIndex: 'duration',
+      },
+      {
+        title: '一等座',
+        dataIndex: 'ydz',
+        key: 'ydz',
+      },
+      {
+        title: '二等座',
+        dataIndex: 'edz',
+        key: 'edz',
+      },
+      {
+        title: '软卧',
+        dataIndex: 'rw',
+        key: 'rw',
+      },
+      {
+        title: '硬卧',
+        dataIndex: 'yw',
+        key: 'yw',
+      },
+/*    {
       title: '出发站',
       dataIndex: 'start',
       key: 'start',
@@ -155,7 +240,7 @@ export default defineComponent({
       title: '硬卧票价',
       dataIndex: 'ywPrice',
       key: 'ywPrice',
-    },
+    },*/
     ];
 
 
@@ -199,6 +284,12 @@ export default defineComponent({
       });
     };
 
+
+    const calDuration = (startTime, endTime) => {
+      let diff = dayjs(endTime, 'HH:mm:ss').diff(dayjs(startTime, 'HH:mm:ss'), 'seconds');
+      return dayjs('00:00:00', 'HH:mm:ss').second(diff).format('HH:mm:ss');
+    };
+
     onMounted(() => {
       handleQuery({
         page: 1,
@@ -215,7 +306,8 @@ export default defineComponent({
       handleTableChange,
       handleQuery,
       loading,
-      params
+      params,
+      calDuration
     };
   },
 });
