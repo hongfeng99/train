@@ -1,12 +1,11 @@
 <template>
   <p>
     <a-space>
-      <train-select-view v-model="params.trainCode" width="200px"></train-select-view>
       <a-date-picker v-model:value="params.date" valueFormat="YYYY-MM-DD" placeholder="请选择日期"></a-date-picker>
       <station-select-view v-model="params.start" width="200px"></station-select-view>
       <station-select-view v-model="params.end" width="200px"></station-select-view>
       <a-button type="primary" @click="handleQuery()">查找</a-button>
-      
+
     </a-space>
   </p>
   <a-table :dataSource="dailyTrainTickets"
@@ -18,15 +17,15 @@
       <template v-if="column.dataIndex === 'operation'">
       </template>
       <template v-else-if="column.dataIndex === 'station'">
-        {{record.start}}<br/>
-        {{record.end}}
+        {{ record.start }}<br/>
+        {{ record.end }}
       </template>
       <template v-else-if="column.dataIndex === 'time'">
-        {{record.startTime}}<br/>
-        {{record.endTime}}
+        {{ record.startTime }}<br/>
+        {{ record.endTime }}
       </template>
       <template v-else-if="column.dataIndex === 'duration'">
-        {{calDuration(record.startTime, record.endTime)}}<br/>
+        {{ calDuration(record.startTime, record.endTime) }}<br/>
         <div v-if="record.startTime.replaceAll(':', '') >= record.endTime.replaceAll(':', '')">
           次日到达
         </div>
@@ -36,8 +35,8 @@
       </template>
       <template v-else-if="column.dataIndex === 'ydz'">
         <div v-if="record.ydz >= 0">
-          {{record.ydz}}<br/>
-          {{record.ydzPrice}}￥
+          {{ record.ydz }}<br/>
+          {{ record.ydzPrice }}￥
         </div>
         <div v-else>
           --
@@ -45,8 +44,8 @@
       </template>
       <template v-else-if="column.dataIndex === 'edz'">
         <div v-if="record.edz >= 0">
-          {{record.edz}}<br/>
-          {{record.edzPrice}}￥
+          {{ record.edz }}<br/>
+          {{ record.edzPrice }}￥
         </div>
         <div v-else>
           --
@@ -54,8 +53,8 @@
       </template>
       <template v-else-if="column.dataIndex === 'rw'">
         <div v-if="record.rw >= 0">
-          {{record.rw}}<br/>
-          {{record.rwPrice}}￥
+          {{ record.rw }}<br/>
+          {{ record.rwPrice }}￥
         </div>
         <div v-else>
           --
@@ -63,8 +62,8 @@
       </template>
       <template v-else-if="column.dataIndex === 'yw'">
         <div v-if="record.yw >= 0">
-          {{record.yw}}<br/>
-          {{record.ywPrice}}￥
+          {{ record.yw }}<br/>
+          {{ record.ywPrice }}￥
         </div>
         <div v-else>
           --
@@ -74,16 +73,15 @@
   </a-table>
 </template>
 <script>
-import { defineComponent, ref, onMounted } from 'vue';
+import {defineComponent, ref, onMounted} from 'vue';
 import {notification} from "ant-design-vue";
 import axios from "axios";
-import TrainSelectView from "@/components/train-select";
 import StationSelectView from "@/components/station-select";
 import dayjs from "dayjs";
 
 export default defineComponent({
   name: "ticket-view",
-  components: {StationSelectView, TrainSelectView},
+  components: {StationSelectView},
   setup() {
     const visible = ref(false);
     let dailyTrainTicket = ref({
@@ -119,16 +117,11 @@ export default defineComponent({
     let loading = ref(false);
     const params = ref({});
     const columns = [
-    {
-      title: '日期',
-      dataIndex: 'date',
-      key: 'date',
-    },
-    {
-      title: '车次编号',
-      dataIndex: 'trainCode',
-      key: 'trainCode',
-    },
+      {
+        title: '车次编号',
+        dataIndex: 'trainCode',
+        key: 'trainCode',
+      },
       {
         title: '车站',
         dataIndex: 'station',
@@ -161,90 +154,20 @@ export default defineComponent({
         dataIndex: 'yw',
         key: 'yw',
       },
-/*    {
-      title: '出发站',
-      dataIndex: 'start',
-      key: 'start',
-    },
-    {
-      title: '出发站拼音',
-      dataIndex: 'startPinyin',
-      key: 'startPinyin',
-    },
-    {
-      title: '出发时间',
-      dataIndex: 'startTime',
-      key: 'startTime',
-    },
-    {
-      title: '出发站序',
-      dataIndex: 'startIndex',
-      key: 'startIndex',
-    },
-    {
-      title: '到达站',
-      dataIndex: 'end',
-      key: 'end',
-    },
-    {
-      title: '到达站拼音',
-      dataIndex: 'endPinyin',
-      key: 'endPinyin',
-    },
-    {
-      title: '到站时间',
-      dataIndex: 'endTime',
-      key: 'endTime',
-    },
-    {
-      title: '到站站序',
-      dataIndex: 'endIndex',
-      key: 'endIndex',
-    },
-    {
-      title: '一等座余票',
-      dataIndex: 'ydz',
-      key: 'ydz',
-    },
-    {
-      title: '一等座票价',
-      dataIndex: 'ydzPrice',
-      key: 'ydzPrice',
-    },
-    {
-      title: '二等座余票',
-      dataIndex: 'edz',
-      key: 'edz',
-    },
-    {
-      title: '二等座票价',
-      dataIndex: 'edzPrice',
-      key: 'edzPrice',
-    },
-    {
-      title: '软卧余票',
-      dataIndex: 'rw',
-      key: 'rw',
-    },
-    {
-      title: '软卧票价',
-      dataIndex: 'rwPrice',
-      key: 'rwPrice',
-    },
-    {
-      title: '硬卧余票',
-      dataIndex: 'yw',
-      key: 'yw',
-    },
-    {
-      title: '硬卧票价',
-      dataIndex: 'ywPrice',
-      key: 'ywPrice',
-    },*/
+
     ];
 
 
     const handleQuery = (param) => {
+      if(Tool.isEmpty(params.value.date)){
+        notification.error({description: "请输入日期"});
+      }
+      if(Tool.isEmpty(params.value.start)){
+        notification.error({description: "请输入出发地"});
+      }
+      if(Tool.isEmpty(params.value.end)){
+        notification.error({description: "请输入目的地"});
+      }
       if (!param) {
         param = {
           page: 1,
@@ -290,11 +213,11 @@ export default defineComponent({
       return dayjs('00:00:00', 'HH:mm:ss').second(diff).format('HH:mm:ss');
     };
 
-    onMounted(() => {
+    onMounted(() => {/*
       handleQuery({
         page: 1,
         size: pagination.value.pageSize
-      });
+      });*/
     });
 
     return {
