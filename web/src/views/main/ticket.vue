@@ -232,7 +232,7 @@ export default defineComponent({
 
     onMounted(() => {
       // "||{}" 是常用技巧，可以避免空指针异常
-      params.value = SessionStorage.get(SESSION_TICKET_PARAMS || {});
+      params.value = SessionStorage.get(SESSION_TICKET_PARAMS) || {};
       if(Tool.isNotEmpty(params.value)){
         handleQuery({
           page: 1,
