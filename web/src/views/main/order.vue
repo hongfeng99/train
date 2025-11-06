@@ -54,12 +54,46 @@
     <a-button type="primary" size="large" @click="finishCheckPassenger">提交订单</a-button>
   </div>
 
+  <a-modal v-model:visible="visible" title="请核对以下信息"
+           style="top: 50px; width: 800px"
+           ok-text="确认" cancel-text="取消"
+           @ok="handleOk">
+    <div class="order-tickets">
+      <a-row class="order-tickets-header" v-if="tickets.length > 0">
+        <a-col :span="3">乘客</a-col>
+        <a-col :span="15">身份证</a-col>
+        <a-col :span="3">票种</a-col>
+        <a-col :span="3">座位类型</a-col>
+      </a-row>
+      <a-row class="order-tickets-row" v-for="ticket in tickets" :key="ticket.passengerId">
+        <a-col :span="3">{{ticket.passengerName}}</a-col>
+        <a-col :span="15">{{ticket.passengerIdCard}}</a-col>
+        <a-col :span="3">
+          <span v-for="item in PASSENGER_TYPE_ARRAY" :key="item.code">
+            <span v-if="item.code === ticket.passengerType">
+              {{item.desc}}
+            </span>
+          </span>
+        </a-col>
+        <a-col :span="3">
+          <span v-for="item in seatTypes" :key="item.code">
+            <span v-if="item.code === ticket.seatTypeCode">
+              {{item.desc}}
+            </span>
+          </span>
+        </a-col>
+      </a-row>
+
+    </div>
+  </a-modal>
+
 </template>
 
 <script>
 import {defineComponent, onMounted, ref, watch} from "vue";
 import axios from "axios";
 import ticket from "./ticket.vue";
+import {notification} from "ant-design-vue";
 
 export default defineComponent({
   name: "order-view",
@@ -113,6 +147,8 @@ export default defineComponent({
     // }
     const tickets = ref([]);
     const PASSENGER_TYPE_ARRAY = window.PASSENGER_TYPE_ARRAY;
+    const visible = ref(false);
+
 
 
     // 勾选或去掉某个乘客时，在购票列表中加上或去掉一张表
@@ -146,6 +182,16 @@ export default defineComponent({
       });
     };
 
+    const finishCheckPassenger = () => {
+      console.log("购票列表：", tickets.value);
+      if (tickets.value.length > 5) {
+        notification.error({description: '最多只能购买5张车票'});
+        return;
+      }
+      // 弹出确认界面
+      visible.value = true;
+    };
+
     onMounted(() =>{
       handleQueryPassenger()
     })
@@ -158,7 +204,9 @@ export default defineComponent({
       passengerOptions,
       passengerChecks,
       tickets,
-      PASSENGER_TYPE_ARRAY
+      PASSENGER_TYPE_ARRAY,
+      visible,
+      finishCheckPassenger
     }
   }
 })
