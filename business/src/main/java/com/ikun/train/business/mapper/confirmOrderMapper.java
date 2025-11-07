@@ -1,36 +1,36 @@
 package com.ikun.train.business.mapper;
 
-import com.ikun.train.business.domain.confirmOrder;
-import com.ikun.train.business.domain.confirmOrderExample;
+import com.ikun.train.business.domain.ConfirmOrder;
+import com.ikun.train.business.domain.ConfirmOrderExample;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
 
 public interface confirmOrderMapper {
-    long countByExample(confirmOrderExample example);
+    long countByExample(ConfirmOrderExample example);
 
-    int deleteByExample(confirmOrderExample example);
+    int deleteByExample(ConfirmOrderExample example);
 
     int deleteByPrimaryKey(Long id);
 
-    int insert(confirmOrder record);
+    int insert(ConfirmOrder record);
 
-    int insertSelective(confirmOrder record);
+    int insertSelective(ConfirmOrder record);
 
-    List<confirmOrder> selectByExampleWithBLOBs(confirmOrderExample example);
+    List<ConfirmOrder> selectByExampleWithBLOBs(ConfirmOrderExample example);
 
-    List<confirmOrder> selectByExample(confirmOrderExample example);
+    List<ConfirmOrder> selectByExample(ConfirmOrderExample example);
 
-    confirmOrder selectByPrimaryKey(Long id);
+    ConfirmOrder selectByPrimaryKey(Long id);
 
-    int updateByExampleSelective(@Param("record") confirmOrder record, @Param("example") confirmOrderExample example);
+    int updateByExampleSelective(@Param("record") ConfirmOrder record, @Param("example") ConfirmOrderExample example);
 
-    int updateByExampleWithBLOBs(@Param("record") confirmOrder record, @Param("example") confirmOrderExample example);
+    int updateByExampleWithBLOBs(@Param("record") ConfirmOrder record, @Param("example") ConfirmOrderExample example);
 
-    int updateByExample(@Param("record") confirmOrder record, @Param("example") confirmOrderExample example);
+    int updateByExample(@Param("record") ConfirmOrder record, @Param("example") ConfirmOrderExample example);
 
-    int updateByPrimaryKeySelective(confirmOrder record);
+    int updateByPrimaryKeySelective(ConfirmOrder record);
 
-    int updateByPrimaryKeyWithBLOBs(confirmOrder record);
+    int updateByPrimaryKeyWithBLOBs(ConfirmOrder record);
 
-    int updateByPrimaryKey(confirmOrder record);
+    int updateByPrimaryKey(ConfirmOrder record);
 }

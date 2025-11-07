@@ -3,12 +3,15 @@ package com.ikun.train.business.service;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.ObjectUtil;
+import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.ikun.train.business.enums.ConfirmOrderStatusEnum;
+import com.ikun.train.common.context.LoginMemberContext;
 import com.ikun.train.common.resp.PageResp;
 import com.ikun.train.common.util.SnowUtil;
-import com.ikun.train.business.domain.confirmOrder;
-import com.ikun.train.business.domain.confirmOrderExample;
+import com.ikun.train.business.domain.ConfirmOrder;
+import com.ikun.train.business.domain.ConfirmOrderExample;
 import com.ikun.train.business.mapper.confirmOrderMapper;
 import com.ikun.train.business.req.ConfirmOrderQueryReq;
 import com.ikun.train.business.req.ConfirmOrderDoReq;
@@ -29,7 +32,7 @@ public class ConfirmOrderService {
 
     public void save(ConfirmOrderDoReq req) {
         DateTime now = DateTime.now();
-        confirmOrder confirmOrder = BeanUtil.copyProperties(req, confirmOrder.class);
+        ConfirmOrder confirmOrder = BeanUtil.copyProperties(req, ConfirmOrder.class);
 
         if (ObjectUtil.isNull(confirmOrder.getId())) {
             confirmOrder.setId(SnowUtil.getSnowflakeNextId());
@@ -43,17 +46,17 @@ public class ConfirmOrderService {
     }
 
     public PageResp<confirmOrderQueryResp> queryList(ConfirmOrderQueryReq req) {
-        confirmOrderExample confirmOrderExample = new confirmOrderExample();
+        ConfirmOrderExample confirmOrderExample = new ConfirmOrderExample();
         confirmOrderExample.setOrderByClause("id desc");
-        confirmOrderExample.Criteria criteria = confirmOrderExample.createCriteria();
+        ConfirmOrderExample.Criteria criteria = confirmOrderExample.createCriteria();
 
 
         LOG.info("查询页码：{}", req.getPage());
         LOG.info("每页条数：{}", req.getSize());
         PageHelper.startPage(req.getPage(), req.getSize());
-        List<confirmOrder> list = confirmOrderMapper.selectByExample(confirmOrderExample);
+        List<ConfirmOrder> list = confirmOrderMapper.selectByExample(confirmOrderExample);
 
-        PageInfo<confirmOrder> pageInfo = new PageInfo<>(list);
+        PageInfo<ConfirmOrder> pageInfo = new PageInfo<>(list);
         LOG.info("总行数：{}", pageInfo.getTotal());
         LOG.info("总页数：{}", pageInfo.getPages());
 
@@ -73,6 +76,22 @@ public class ConfirmOrderService {
         // 省略业务数据校验，如：车次是否存在，余票是否存在，车次是否在有效期内，tickets条数>0，同乘客同车次是否已买过
 
         // 保存确认订单表，状态初始
+        DateTime now = DateTime.now();
+        ConfirmOrder confirmOrder = new ConfirmOrder();
+        confirmOrder.setId(SnowUtil.getSnowflakeNextId());
+        confirmOrder.setMemberId(LoginMemberContext.getId());
+        confirmOrder.setDate(req.getDate());
+        confirmOrder.setTrainCode(req.getTrainCode());
+        confirmOrder.setStart(req.getStart());
+        confirmOrder.setEnd(req.getEnd());
+        confirmOrder.setDailyTrainTicketId(req.getDailyTrainTicketId());
+        confirmOrder.setStatus(ConfirmOrderStatusEnum.INIT.getCode());
+        confirmOrder.setCreateTime(now);
+        confirmOrder.setUpdateTime(now);
+        confirmOrder.setTickets(JSON.toJSONString(req.getTickets()));
+        confirmOrderMapper.insert(confirmOrder);
+
+
 
         // 查出余票记录，需要得到真实的库存
 

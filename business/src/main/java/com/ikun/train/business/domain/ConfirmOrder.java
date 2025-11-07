@@ -2,7 +2,7 @@ package com.ikun.train.business.domain;
 
 import java.util.Date;
 
-public class confirmOrder {
+public class ConfirmOrder {
     private Long id;
 
     private Long memberId;
