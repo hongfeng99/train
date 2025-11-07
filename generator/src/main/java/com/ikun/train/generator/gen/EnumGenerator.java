@@ -2,6 +2,7 @@ package com.ikun.train.generator.gen;
 
 
 import cn.hutool.core.util.StrUtil;
+import com.ikun.train.business.enums.ConfirmOrderStatusEnum;
 import com.ikun.train.business.enums.SeatColEnum;
 import com.ikun.train.business.enums.SeatTypeEnum;
 import com.ikun.train.business.enums.TrainTypeEnum;
@@ -17,8 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EnumGenerator {
-//    static String path = "admin/src/assets/js/enums.js";
-    static String path = "web/src/assets/js/enums.js";
+    static String path = "admin/src/assets/js/enums.js";
+//    static String path = "web/src/assets/js/enums.js";
 
 
     public static void main(String[] args) {
@@ -30,6 +31,7 @@ public class EnumGenerator {
             toJson(TrainTypeEnum.class, bufferObject, bufferArray);
             toJson(SeatTypeEnum.class, bufferObject, bufferArray);
             toJson(SeatColEnum.class, bufferObject, bufferArray);
+            toJson(ConfirmOrderStatusEnum.class, bufferObject, bufferArray);
 
             StringBuffer buffer = bufferObject.append("\r\n").append(bufferArray);
             writeJs(buffer);
@@ -46,8 +48,6 @@ public class EnumGenerator {
                 .toUpperCase().replace("_ENUM", "");
         Object[] objects = clazz.getEnumConstants();
         Method name = clazz.getMethod("name");
-        Method getDesc = clazz.getMethod("getDesc");
-        Method getCode = clazz.getMethod("getCode");
 
         // 排除枚举属性和$VALUES，只获取code desc等
         List<Field> targetFields = new ArrayList<>();
