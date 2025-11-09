@@ -3,6 +3,7 @@ package com.ikun.train.business.service;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.EnumUtil;
+import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
@@ -12,16 +13,16 @@ import com.ikun.train.business.domain.*;
 import com.ikun.train.business.enums.ConfirmOrderStatusEnum;
 import com.ikun.train.business.enums.SeatColEnum;
 import com.ikun.train.business.enums.SeatTypeEnum;
+import com.ikun.train.business.mapper.confirmOrderMapper;
+import com.ikun.train.business.req.ConfirmOrderDoReq;
+import com.ikun.train.business.req.ConfirmOrderQueryReq;
 import com.ikun.train.business.req.ConfirmOrderTicketReq;
+import com.ikun.train.business.resp.confirmOrderQueryResp;
 import com.ikun.train.common.context.LoginMemberContext;
 import com.ikun.train.common.exception.BusinessException;
 import com.ikun.train.common.exception.BusinessExceptionEnum;
 import com.ikun.train.common.resp.PageResp;
 import com.ikun.train.common.util.SnowUtil;
-import com.ikun.train.business.mapper.confirmOrderMapper;
-import com.ikun.train.business.req.ConfirmOrderQueryReq;
-import com.ikun.train.business.req.ConfirmOrderDoReq;
-import com.ikun.train.business.resp.confirmOrderQueryResp;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +39,7 @@ public class ConfirmOrderService {
     @Resource
     private confirmOrderMapper confirmOrderMapper;
     @Resource
-    private  DailyTrainTicketService dailyTrainTicketService;
+    private DailyTrainTicketService dailyTrainTicketService;
     @Resource
     private DailyTrainCarriageService dailyTrainCarriageService;
     @Resource
@@ -113,11 +114,9 @@ public class ConfirmOrderService {
         confirmOrderMapper.insert(confirmOrder);
 
 
-
         // 查出余票记录，需要得到真实的库存
         DailyTrainTicket dailyTrainTicket = dailyTrainTicketService.selectByUnique(date, trainCode, start, end);
-        LOG.info("查出余票记录：{}",dailyTrainTicket);
-
+        LOG.info("查出余票记录：{}", dailyTrainTicket);
 
 
         // 预扣减余票数量，并判断余票是否足够
@@ -127,21 +126,21 @@ public class ConfirmOrderService {
         // 比如选择的是C1,D2,则偏移值是[0,5]
         // 比如选择的是A1,B1,C1, 则偏移值是[0,1,2]
         ConfirmOrderTicketReq ticketReq0 = tickets.get(0);
-        if(StrUtil.isNotBlank(ticketReq0.getSeat())){
+        if (StrUtil.isNotBlank(ticketReq0.getSeat())) {
             LOG.info("本次购票有选座");
             // 查出本次选座的作为类型都有哪几个列，用于计算所选座位与第一个座位的偏离值
             List<SeatColEnum> colEnumList = SeatColEnum.getColsByType(ticketReq0.getSeatTypeCode());
-            LOG.info("本次选座的座位类型包含的列：{}",colEnumList);
+            LOG.info("本次选座的座位类型包含的列：{}", colEnumList);
 
             // 组成和前端两排选座一样的列表，用于作参照的座位列表
             // 例如：referSeatList = { A1, B1, C1, D1, A2, B2, C2, D2}
             List<String> referSeatList = new ArrayList<>();
-            for (int i = 1 ; i <= 2; i ++){
-                for(SeatColEnum seatColEnum: colEnumList){
+            for (int i = 1; i <= 2; i++) {
+                for (SeatColEnum seatColEnum : colEnumList) {
                     referSeatList.add(seatColEnum.getCode() + i);
                 }
             }
-            LOG.info("用于做参照的两排座位:{}",referSeatList);
+            LOG.info("用于做参照的两排座位:{}", referSeatList);
 
             List<Integer> offsetList = new ArrayList<>();
             // 绝对偏移值，即: 在参照座位列表中的位置
@@ -150,28 +149,31 @@ public class ConfirmOrderService {
                 int index = referSeatList.indexOf(ticketReq.getSeat());
                 absoluteOffsetList.add(index);
             }
-            LOG.info("计算得到所有座位的绝对偏移值：{}",absoluteOffsetList);
-            for(Integer index: absoluteOffsetList){
+            LOG.info("计算得到所有座位的绝对偏移值：{}", absoluteOffsetList);
+            for (Integer index : absoluteOffsetList) {
                 int offset = index - absoluteOffsetList.get(0);
                 offsetList.add(offset);
             }
-            LOG.info("计算得到所有座位的相对第一个座位的偏移值：{}",offsetList);
+            LOG.info("计算得到所有座位的相对第一个座位的偏移值：{}", offsetList);
 
             getSeat(date,
                     trainCode,
                     ticketReq0.getSeatTypeCode(),
                     ticketReq0.getSeat().split("")[0], // 从A1得到A
-                    offsetList);
+                    offsetList,
+                    dailyTrainTicket.getStartIndex(),
+                    dailyTrainTicket.getEndIndex());
 
-        }else{
+        } else {
             LOG.info("本次购票没有选座");
-            for(ConfirmOrderTicketReq ticketReq: tickets){
+            for (ConfirmOrderTicketReq ticketReq : tickets) {
                 getSeat(date,
                         trainCode,
                         ticketReq.getSeatTypeCode(),
                         null,
-                        null
-                );
+                        null,
+                        dailyTrainTicket.getStartIndex(),
+                        dailyTrainTicket.getEndIndex());
             }
         }
 
@@ -191,55 +193,109 @@ public class ConfirmOrderService {
     }
 
     private void getSeat(Date date, String trainCode, String seatType,
-                         String column, List<Integer> offsetList){
+                         String column, List<Integer> offsetList,
+                         Integer startIndex, Integer endIndex) {
         List<DailyTrainCarriage> carriageList = dailyTrainCarriageService
                 .selectBySeatType(date, trainCode, seatType);
-        LOG.info("共查出{}个符合条件的车厢",carriageList.size());
+        LOG.info("共查出{}个符合条件的车厢", carriageList.size());
 
         // 一个车箱一个车箱地获取座位数据
-        for(DailyTrainCarriage dailyTrainCarriage: carriageList){
-            LOG.info("开始从{}车厢选座",dailyTrainCarriage.getIndex());
+        for (DailyTrainCarriage dailyTrainCarriage : carriageList) {
+            LOG.info("开始从{}车厢选座", dailyTrainCarriage.getIndex());
             List<DailyTrainSeat> seatList = dailyTrainSeatService
                     .selectByCarriage(date, trainCode, dailyTrainCarriage.getIndex());
 
-            LOG.info("车厢{}的座位数为{}",dailyTrainCarriage.getIndex(),seatList.size());
+            LOG.info("车厢{}的座位数为{}", dailyTrainCarriage.getIndex(), seatList.size());
+            for (DailyTrainSeat dailyTrainSeat : seatList) {
+                boolean isChoose = calSell(dailyTrainSeat, startIndex, endIndex);
+                if (isChoose) {
+                    LOG.info("选中座位");
+                    return;
+                } else {
+                }
 
+            }
 
         }
+    }
 
+    /**
+     * 计算某座位在区间内是否可以被售卖
+     *
+     * @param dailyTrainSeat 例: sell=10001，本次购买区间站 1~4，则区间已售信息为 000
+     *                       全部是 0，表示这个区间可买；只要有 1，就表示区间内已售过票
+     *                       <p>
+     *                       选中后，要计算购票后的 sell，比如原来是 10001，本次购买区间站 1~4
+     *                       方案：构造本次购票造成的售卖信息 01110，和原 sell 10001 按位或，最终得到 11111
+     */
 
+    private boolean calSell(DailyTrainSeat dailyTrainSeat, Integer startIndex, Integer endIndex) {
+        // 10001  00000
+        String sell = dailyTrainSeat.getSell();
+        // 000    000
+        String sellPart = sell.substring(startIndex, endIndex);
+        if (Integer.parseInt(sellPart) > 0) {
+            LOG.info("座位{}在本次车站区间{}-{}已售过票，不可选中该座位", dailyTrainSeat
+                    .getCarriageSeatIndex(), startIndex, endIndex);
+            return false;
+        } else {
+            LOG.info("座位{}在本次车站区间{}-{}未售过票，可选中该座位", dailyTrainSeat
+                    .getCarriageSeatIndex(), startIndex, endIndex);
+            // 111      111
+            String curSell = sellPart.replace('0', '1');
+            // 0111     0111
+            curSell = StrUtil.fillBefore(curSell, '0', endIndex);
+            // 01110    01110
+            curSell = StrUtil.fillAfter(curSell, '0', sell.length());
 
+            // 当前区间售票信息curSell 01110与库里的已售信息sell 00001按位与，即可得到该座位卖出此票后的售票详情
+            // 15(01111)  14(01110) = 01110 | 00000
+            int newSellInt = NumberUtil.binaryToInt(curSell) | NumberUtil.binaryToInt(sell);
+            // 1111     1110
+            String newSell = NumberUtil.getBinaryStr(newSellInt);
+            // 01111    01110
+            newSell = StrUtil.fillBefore(newSell, '0', sell.length());
+            LOG.info("座位 {} 被选中，原售票信息: {}，车站区间: {}-{}，即: {}，最终售票信息: {}",
+                    dailyTrainSeat.getCarriageSeatIndex(),
+                    sell,
+                    startIndex, endIndex,
+                    curSell,
+                    newSell
+            );
+            dailyTrainSeat.setSell(newSell);
+            return true;
+        }
     }
 
     private static void reduceTickets(ConfirmOrderDoReq req, DailyTrainTicket dailyTrainTicket) {
-        for(ConfirmOrderTicketReq ticketReq: req.getTickets()){
+        for (ConfirmOrderTicketReq ticketReq : req.getTickets()) {
             String seatTypeCode = ticketReq.getSeatTypeCode();
             SeatTypeEnum seatTypeEnum = EnumUtil.getBy(SeatTypeEnum::getCode, seatTypeCode);
-            switch (seatTypeEnum){
+            switch (seatTypeEnum) {
                 case YDZ -> {
                     int countLeft = dailyTrainTicket.getYdz() - 1;
-                    if(countLeft < 0){
+                    if (countLeft < 0) {
                         throw new BusinessException(BusinessExceptionEnum.CONFIRM_ORDER_TICKET_COUNT_ERROR);
                     }
                     dailyTrainTicket.setYdz(countLeft);
                 }
                 case EDZ -> {
                     int countLeft = dailyTrainTicket.getEdz() - 1;
-                    if(countLeft < 0){
+                    if (countLeft < 0) {
                         throw new BusinessException(BusinessExceptionEnum.CONFIRM_ORDER_TICKET_COUNT_ERROR);
                     }
                     dailyTrainTicket.setEdz(countLeft);
                 }
                 case RW -> {
                     int countLeft = dailyTrainTicket.getRw() - 1;
-                    if(countLeft < 0){
+                    if (countLeft < 0) {
                         throw new BusinessException(BusinessExceptionEnum.CONFIRM_ORDER_TICKET_COUNT_ERROR);
                     }
                     dailyTrainTicket.setRw(countLeft);
                 }
                 case YW -> {
                     int countLeft = dailyTrainTicket.getYw() - 1;
-                    if(countLeft < 0){
+                    if (countLeft < 0) {
                         throw new BusinessException(BusinessExceptionEnum.CONFIRM_ORDER_TICKET_COUNT_ERROR);
                     }
                     dailyTrainTicket.setYw(countLeft);
