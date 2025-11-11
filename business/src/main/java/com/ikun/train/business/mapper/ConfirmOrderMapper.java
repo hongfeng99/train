@@ -2,10 +2,11 @@ package com.ikun.train.business.mapper;
 
 import com.ikun.train.business.domain.ConfirmOrder;
 import com.ikun.train.business.domain.ConfirmOrderExample;
-import java.util.List;
 import org.apache.ibatis.annotations.Param;
 
-public interface confirmOrderMapper {
+import java.util.List;
+
+public interface ConfirmOrderMapper {
     long countByExample(ConfirmOrderExample example);
 
     int deleteByExample(ConfirmOrderExample example);

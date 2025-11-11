@@ -1,8 +1,11 @@
 package com.ikun.train.business.service;
 
+import com.ikun.train.business.domain.ConfirmOrder;
 import com.ikun.train.business.domain.DailyTrainSeat;
 import com.ikun.train.business.domain.DailyTrainTicket;
+import com.ikun.train.business.enums.ConfirmOrderStatusEnum;
 import com.ikun.train.business.feign.MemberFeign;
+import com.ikun.train.business.mapper.ConfirmOrderMapper;
 import com.ikun.train.business.mapper.DailyTrainSeatMapper;
 import com.ikun.train.business.mapper.cust.DailyTrainTicketMapperCust;
 import com.ikun.train.business.req.ConfirmOrderTicketReq;
@@ -33,6 +36,9 @@ public class AfterConfirmOrderService {
     @Resource
     private MemberFeign memberFeign;
 
+    @Resource
+    private ConfirmOrderMapper confirmOrderMapper;
+
     /**
      * 选中座位后事务处理:
      * 座位表修改售卖情况sell;
@@ -43,7 +49,8 @@ public class AfterConfirmOrderService {
     @Transactional
     public void afterDoConfirm(DailyTrainTicket dailyTrainTicket,
                                List<DailyTrainSeat> finalSeatList,
-                               List<ConfirmOrderTicketReq> tickets) {
+                               List<ConfirmOrderTicketReq> tickets,
+                               ConfirmOrder confirmOrder) {
         for (int j = 0; j < finalSeatList.size(); j++) {
             DailyTrainSeat dailyTrainSeat = finalSeatList.get(j);
             DailyTrainSeat seatForUpdate = new DailyTrainSeat();
@@ -121,6 +128,14 @@ public class AfterConfirmOrderService {
             memberTicketReq.setUpdateTime(dailyTrainTicket.getUpdateTime());
             CommonResp<Object> commonResp = memberFeign.save(memberTicketReq);
             LOG.info("调用member，返回：{}",commonResp);
+
+            // 更新订单状态为成功
+            ConfirmOrder confirmOrderForUpdate = new ConfirmOrder();
+            confirmOrderForUpdate.setId(confirmOrder.getId());
+            confirmOrderForUpdate.setStatus(ConfirmOrderStatusEnum.SUCCESS.getCode());
+            confirmOrderForUpdate.setUpdateTime(new Date());
+            confirmOrderMapper.updateByPrimaryKeySelective(confirmOrderForUpdate);
+
         }
     }
 

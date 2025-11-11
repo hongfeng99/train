@@ -14,7 +14,7 @@ import com.ikun.train.business.domain.*;
 import com.ikun.train.business.enums.ConfirmOrderStatusEnum;
 import com.ikun.train.business.enums.SeatColEnum;
 import com.ikun.train.business.enums.SeatTypeEnum;
-import com.ikun.train.business.mapper.confirmOrderMapper;
+import com.ikun.train.business.mapper.ConfirmOrderMapper;
 import com.ikun.train.business.req.ConfirmOrderDoReq;
 import com.ikun.train.business.req.ConfirmOrderQueryReq;
 import com.ikun.train.business.req.ConfirmOrderTicketReq;
@@ -38,7 +38,7 @@ public class ConfirmOrderService {
     private static final Logger LOG = LoggerFactory.getLogger(ConfirmOrderService.class);
 
     @Resource
-    private confirmOrderMapper confirmOrderMapper;
+    private ConfirmOrderMapper confirmOrderMapper;
     @Resource
     private DailyTrainTicketService dailyTrainTicketService;
     @Resource
@@ -195,7 +195,7 @@ public class ConfirmOrderService {
             // 余票详情表修改余票；
             // 为会员增加购票记录
             // 更新确认订单为成功
-        afterConfirmOrderService.afterDoConfirm(dailyTrainTicket,finalSeatList,tickets);
+        afterConfirmOrderService.afterDoConfirm(dailyTrainTicket,finalSeatList,tickets, confirmOrder);
     }
 
     private void getSeat(List<DailyTrainSeat> finalSeatList, Date date, String trainCode, String seatType,
