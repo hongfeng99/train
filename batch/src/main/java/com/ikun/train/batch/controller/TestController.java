@@ -22,7 +22,7 @@ public class TestController {
         LOG.info(helloBusiness);
 
 
-        return "Hello world! Batch";
+        return "Hello world! Batch !" + helloBusiness;
     }
 }
 
