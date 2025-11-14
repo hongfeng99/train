@@ -9,7 +9,10 @@ import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.ikun.train.business.domain.*;
+import com.ikun.train.business.domain.DailyTrain;
+import com.ikun.train.business.domain.DailyTrainTicket;
+import com.ikun.train.business.domain.DailyTrainTicketExample;
+import com.ikun.train.business.domain.TrainStation;
 import com.ikun.train.business.enums.SeatTypeEnum;
 import com.ikun.train.business.enums.TrainTypeEnum;
 import com.ikun.train.business.mapper.DailyTrainTicketMapper;
@@ -22,7 +25,6 @@ import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,7 +64,7 @@ public class DailyTrainTicketService {
         }
     }
 
-    @Cacheable(value = "DailyTrainTicketService.queryList")
+//    @Cacheable(value = "DailyTrainTicketService.queryList")
     public PageResp<DailyTrainTicketQueryResp> queryList(DailyTrainTicketQueryReq req) {
         DailyTrainTicketExample dailyTrainTicketExample = new DailyTrainTicketExample();
         dailyTrainTicketExample.setOrderByClause("id desc");
