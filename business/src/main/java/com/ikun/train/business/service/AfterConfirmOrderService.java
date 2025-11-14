@@ -12,8 +12,7 @@ import com.ikun.train.business.req.ConfirmOrderTicketReq;
 import com.ikun.train.common.context.LoginMemberContext;
 import com.ikun.train.common.req.MemberTicketReq;
 import com.ikun.train.common.resp.CommonResp;
-import io.seata.core.context.RootContext;
-import io.seata.spring.annotation.GlobalTransactional;
+//import io.seata.core.context.RootContext;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,12 +46,12 @@ public class AfterConfirmOrderService {
      * 为会员增加购票记录
      * 更新确认订单为成功
      */
-    @GlobalTransactional
+//    @GlobalTransactional
     public void afterDoConfirm(DailyTrainTicket dailyTrainTicket,
                                List<DailyTrainSeat> finalSeatList,
                                List<ConfirmOrderTicketReq> tickets,
                                ConfirmOrder confirmOrder) {
-        LOG.info("seata全局事务id：{}", RootContext.getXID());
+//        LOG.info("seata全局事务id：{}", RootContext.getXID());
         for (int j = 0; j < finalSeatList.size(); j++) {
             DailyTrainSeat dailyTrainSeat = finalSeatList.get(j);
             DailyTrainSeat seatForUpdate = new DailyTrainSeat();

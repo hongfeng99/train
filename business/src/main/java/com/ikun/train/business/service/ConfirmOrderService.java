@@ -120,8 +120,8 @@ public class ConfirmOrderService {
              leaseTime - lease time 锁时长，即n秒后自动释放锁
              time unit - time unit 时间单位
              */
-             boolean tryLock = lock.tryLock(30, 10, TimeUnit.SECONDS); // 不带着看门狗
-//            boolean tryLock = lock.tryLock(0, TimeUnit.SECONDS); // 带着看门狗
+//             boolean tryLock = lock.tryLock(30, 10, TimeUnit.SECONDS); // 不带着看门狗
+            boolean tryLock = lock.tryLock(0, TimeUnit.SECONDS); // 带着看门狗
             if (tryLock) {
                 LOG.info("恭喜，抢到锁了！");
                 // for (int i = 0; i < 30; i++) {
