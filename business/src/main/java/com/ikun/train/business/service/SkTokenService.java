@@ -9,6 +9,7 @@ import com.github.pagehelper.PageInfo;
 import com.ikun.train.business.domain.SkToken;
 import com.ikun.train.business.domain.SkTokenExample;
 import com.ikun.train.business.mapper.SkTokenMapper;
+import com.ikun.train.business.mapper.cust.SkTokenMapperCust;
 import com.ikun.train.business.req.SkTokenQueryReq;
 import com.ikun.train.business.req.SkTokenSaveReq;
 import com.ikun.train.business.resp.SkTokenQueryResp;
@@ -34,6 +35,9 @@ public class SkTokenService {
 
     @Resource
     private DailyTrainStationService dailyTrainStationService;
+
+    @Resource
+    private SkTokenMapperCust skTokenMapperCust;
     public void genDaily(Date date, String trainCode) {
         LOG.info("删除日期【{}】车次【{}】的令牌记录", DateUtil.formatDate(date), trainCode);
         SkTokenExample skTokenExample = new SkTokenExample();
@@ -54,8 +58,8 @@ public class SkTokenService {
         long stationCount = dailyTrainStationService.countByTrainCode(trainCode);
         LOG.info("车次【{}】到站数: {}", trainCode, stationCount);
 
-        // 需要根据实际卖票比例来定，一趟火车最多可以卖（seatCount * stationCount）张火车票
-        int count = (int) (seatCount * stationCount );
+        // 比例系数3/4需要根据实际卖票比例来定，一趟火车最多可以卖（seatCount * stationCount）张火车票
+        int count = (int) (seatCount * stationCount * 3/4);
         LOG.info("车次【{}】初始生成令牌数: {}", trainCode, count);
         skToken.setCount(count);
 
@@ -102,4 +106,17 @@ public class SkTokenService {
     public void delete(Long id) {
         skTokenMapper.deleteByPrimaryKey(id);
     }
+
+    public boolean validSkToken(Date date, String trainCode, Long memberId) {
+        LOG.info("会员【{}】获取日期【{}】车次【{}】的令牌开始", memberId, DateUtil.formatDate(date), trainCode);
+
+        // 令牌约等于库存，令牌没有了，就不再卖票，不需要再进入购票主流程去判断库存，判断令牌肯定比判断库存快
+        int updateCount = skTokenMapperCust.decrease(date, trainCode);
+        if (updateCount > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 }
