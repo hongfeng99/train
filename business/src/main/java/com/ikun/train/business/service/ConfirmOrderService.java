@@ -3,6 +3,7 @@ package com.ikun.train.business.service;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -14,6 +15,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.ikun.train.business.domain.*;
 import com.ikun.train.business.enums.ConfirmOrderStatusEnum;
+import com.ikun.train.business.enums.RedisKeyPreEnum;
 import com.ikun.train.business.enums.SeatColEnum;
 import com.ikun.train.business.enums.SeatTypeEnum;
 import com.ikun.train.business.mapper.ConfirmOrderMapper;
@@ -116,14 +118,14 @@ public class ConfirmOrderService {
         }
 
         // 购票
-        String lockKey = req.getDate() + "-" + req.getTrainCode();
+        String lockKey = RedisKeyPreEnum.CONFIRM_ORDER + "-" + DateUtil.formatDate(req.getDate()) + "-" + req.getTrainCode();
 //        Boolean setIfAbsent = redisTemplate.opsForValue().setIfAbsent(lockKey, lockKey, 5, TimeUnit.SECONDS);
 //        if (Boolean.TRUE.equals(setIfAbsent)) {
 //            LOG.info("恭喜，抢到锁了！");
 //        } else {
 //            // 只是没抢到锁，并不知道票抢完了没，所以提示稍候再试
 //            LOG.info("很遗憾，没抢到锁");
-//            throw new BusinessException(BusinessExceptionEnum.CONFIRM_ORDER_LOCK_FAIL);
+//            throw new BusinessException(BusinessExceptionEnum.CON FIRM_ORDER_LOCK_FAIL);
 //        }
 
         RLock lock = null;
