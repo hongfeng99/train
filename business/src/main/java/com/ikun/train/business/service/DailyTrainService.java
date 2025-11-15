@@ -44,6 +44,8 @@ public class DailyTrainService {
     private DailyTrainSeatService dailyTrainSeatService;
     @Autowired
     private DailyTrainTicketService dailyTrainTicketService;
+    @Autowired
+    private SkTokenService skTokenService;
 
     public void save(DailyTrainSaveReq req) {
         DateTime now = DateTime.now();
@@ -93,16 +95,17 @@ public class DailyTrainService {
 
     /**
      * 生成某日所有车次信息，包括车次，车站，车厢，座位
+     *
      * @param date
      */
-    public void genDaily(Date date){
+    public void genDaily(Date date) {
         List<Train> trainList = trainService.selectAll();
-        if(CollUtil.isEmpty(trainList)){
+        if (CollUtil.isEmpty(trainList)) {
             LOG.info("没有车次基础数据，任务结束");
             return;
         }
 
-        for(Train train:trainList){
+        for (Train train : trainList) {
             genDailyTrain(date, train);
         }
 
@@ -127,20 +130,23 @@ public class DailyTrainService {
         dailyTrainMapper.insert(dailyTrain);
 
         // 生成该车次当日的车站数据
-        dailyTrainStationService.genDaily(date,train.getCode());
-        LOG.info("结束生成日期为【{}】，车次为【{}】的车站信息", DateUtil.formatDate(date),train.getCode());
+        dailyTrainStationService.genDaily(date, train.getCode());
+        LOG.info("结束生成日期为【{}】，车次为【{}】的车站信息", DateUtil.formatDate(date), train.getCode());
 
         // 生成该车次当日的车厢数据
-        dailyTrainCarriageService.genDaily(date,train.getCode());
-        LOG.info("开始生成日期为【{}】，车次为【{}】的车厢数据",DateUtil.formatDate(date),train.getCode());
+        dailyTrainCarriageService.genDaily(date, train.getCode());
+        LOG.info("开始生成日期为【{}】，车次为【{}】的车厢数据", DateUtil.formatDate(date), train.getCode());
 
         // 生成该车次当日的车座数据
-        dailyTrainSeatService.genDaily(date,train.getCode());
-        LOG.info("开始生成日期为【{}】，车次为【{}】的车座数据",DateUtil.formatDate(date),train.getCode());
+        dailyTrainSeatService.genDaily(date, train.getCode());
+        LOG.info("开始生成日期为【{}】，车次为【{}】的车座数据", DateUtil.formatDate(date), train.getCode());
 
         // 生成该车次当日的车票数据
-        dailyTrainTicketService.genDaily(dailyTrain, date,train.getCode());
-        LOG.info("开始生成日期为【{}】，车次为【{}】的车座数据",DateUtil.formatDate(date),train.getCode());
+        dailyTrainTicketService.genDaily(dailyTrain, date, train.getCode());
+        LOG.info("开始生成日期为【{}】，车次为【{}】的车座数据", DateUtil.formatDate(date), train.getCode());
+
+        // 生成令牌余量数据
+        skTokenService.genDaily(date,train.getCode());
 
     }
 }

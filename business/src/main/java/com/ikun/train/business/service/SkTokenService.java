@@ -2,62 +2,95 @@ package com.ikun.train.business.service;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.ikun.train.common.resp.PageResp;
-import com.ikun.train.common.util.SnowUtil;
 import com.ikun.train.business.domain.SkToken;
 import com.ikun.train.business.domain.SkTokenExample;
 import com.ikun.train.business.mapper.SkTokenMapper;
 import com.ikun.train.business.req.SkTokenQueryReq;
 import com.ikun.train.business.req.SkTokenSaveReq;
 import com.ikun.train.business.resp.SkTokenQueryResp;
+import com.ikun.train.common.resp.PageResp;
+import com.ikun.train.common.util.SnowUtil;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
 public class SkTokenService {
-private static final Logger LOG = LoggerFactory.getLogger(SkTokenService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SkTokenService.class);
 
-@Resource
-private SkTokenMapper skTokenMapper;
+    @Resource
+    private SkTokenMapper skTokenMapper;
 
-public void save(SkTokenSaveReq req){
-DateTime now = DateTime.now();
-SkToken skToken = BeanUtil.copyProperties(req, SkToken.class);
+    @Resource
+    private DailyTrainSeatService dailyTrainSeatService;
 
-if(ObjectUtil.isNull(req.getId())){
-skToken.setId(SnowUtil.getSnowflakeNextId());
-skToken.setCreateTime(now);
-skToken.setUpdateTime(now);
-skTokenMapper.insert(skToken);
-}else{
-skToken.setUpdateTime(now);
-skTokenMapper.updateByPrimaryKey(skToken);
-}
-}
+    @Resource
+    private DailyTrainStationService dailyTrainStationService;
+    public void genDaily(Date date, String trainCode) {
+        LOG.info("删除日期【{}】车次【{}】的令牌记录", DateUtil.formatDate(date), trainCode);
+        SkTokenExample skTokenExample = new SkTokenExample();
+        skTokenExample.createCriteria().andDateEqualTo(date).andTrainCodeEqualTo(trainCode);
+        skTokenMapper.deleteByExample(skTokenExample);
 
-public PageResp<SkTokenQueryResp> queryList(SkTokenQueryReq req){
-    SkTokenExample skTokenExample = new SkTokenExample();
-    skTokenExample.setOrderByClause("id desc");
-    SkTokenExample.Criteria criteria = skTokenExample.createCriteria();
+        DateTime now = DateTime.now();
+        SkToken skToken = new SkToken();
+        skToken.setDate(date);
+        skToken.setTrainCode(trainCode);
+        skToken.setId(SnowUtil.getSnowflakeNextId());
+        skToken.setCreateTime(now);
+        skToken.setUpdateTime(now);
+
+        int seatCount = dailyTrainSeatService.countSeat(date, trainCode);
+        LOG.info("车次【{}】座位数: {}", trainCode, seatCount);
+
+        long stationCount = dailyTrainStationService.countByTrainCode(trainCode);
+        LOG.info("车次【{}】到站数: {}", trainCode, stationCount);
+
+        // 需要根据实际卖票比例来定，一趟火车最多可以卖（seatCount * stationCount）张火车票
+        int count = (int) (seatCount * stationCount );
+        LOG.info("车次【{}】初始生成令牌数: {}", trainCode, count);
+        skToken.setCount(count);
+    }
+
+    public void save(SkTokenSaveReq req) {
+        DateTime now = DateTime.now();
+        SkToken skToken = BeanUtil.copyProperties(req, SkToken.class);
+
+        if (ObjectUtil.isNull(req.getId())) {
+            skToken.setId(SnowUtil.getSnowflakeNextId());
+            skToken.setCreateTime(now);
+            skToken.setUpdateTime(now);
+            skTokenMapper.insert(skToken);
+        } else {
+            skToken.setUpdateTime(now);
+            skTokenMapper.updateByPrimaryKey(skToken);
+        }
+    }
+
+    public PageResp<SkTokenQueryResp> queryList(SkTokenQueryReq req) {
+        SkTokenExample skTokenExample = new SkTokenExample();
+        skTokenExample.setOrderByClause("id desc");
+        SkTokenExample.Criteria criteria = skTokenExample.createCriteria();
 
 
-    LOG.info("查询页码：{}", req.getPage());
-    LOG.info("每页条数：{}", req.getSize());
-    PageHelper.startPage(req.getPage(),req.getSize());
-    List<SkToken> list = skTokenMapper.selectByExample(skTokenExample);
+        LOG.info("查询页码：{}", req.getPage());
+        LOG.info("每页条数：{}", req.getSize());
+        PageHelper.startPage(req.getPage(), req.getSize());
+        List<SkToken> list = skTokenMapper.selectByExample(skTokenExample);
 
-    PageInfo<SkToken> pageInfo = new PageInfo<>(list);
-    LOG.info("总行数：{}", pageInfo.getTotal());
-    LOG.info("总页数：{}", pageInfo.getPages());
+        PageInfo<SkToken> pageInfo = new PageInfo<>(list);
+        LOG.info("总行数：{}", pageInfo.getTotal());
+        LOG.info("总页数：{}", pageInfo.getPages());
 
-    List<SkTokenQueryResp> list1 = BeanUtil.copyToList(list, SkTokenQueryResp.class);
+        List<SkTokenQueryResp> list1 = BeanUtil.copyToList(list, SkTokenQueryResp.class);
         PageResp<SkTokenQueryResp> pageResp = new PageResp<>();
         pageResp.setTotal(pageInfo.getTotal());
         pageResp.setList(list1);
