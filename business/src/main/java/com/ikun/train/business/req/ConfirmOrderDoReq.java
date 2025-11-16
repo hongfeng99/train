@@ -54,6 +54,17 @@ public class ConfirmOrderDoReq {
     private List<ConfirmOrderTicketReq> tickets;
 
 
+    /**
+     * 验证码
+     */
+    @NotBlank(message = "【图片验证码】不能为空")
+    private String imageCode;
+    /**
+     * 图片验证码token
+     */
+    @NotBlank(message = "【图片验证码】参数非法")
+    private String imageCodeToken;
+
     public Long getMemberId() {
         return memberId;
     }
@@ -68,6 +79,37 @@ public class ConfirmOrderDoReq {
 
     public void setDate(Date date) {
         this.date = date;
+    }
+
+    public @NotBlank(message = "【图片验证码】不能为空") String getImageCode() {
+        return imageCode;
+    }
+
+    public void setImageCode(@NotBlank(message = "【图片验证码】不能为空") String imageCode) {
+        this.imageCode = imageCode;
+    }
+
+    @Override
+    public String toString() {
+        return "ConfirmOrderDoReq{" +
+                "memberId=" + memberId +
+                ", date=" + date +
+                ", trainCode='" + trainCode + '\'' +
+                ", start='" + start + '\'' +
+                ", end='" + end + '\'' +
+                ", dailyTrainTicketId=" + dailyTrainTicketId +
+                ", tickets=" + tickets +
+                ", imageCode='" + imageCode + '\'' +
+                ", imageCodeToken='" + imageCodeToken + '\'' +
+                '}';
+    }
+
+    public @NotBlank(message = "【图片验证码】参数非法") String getImageCodeToken() {
+        return imageCodeToken;
+    }
+
+    public void setImageCodeToken(@NotBlank(message = "【图片验证码】参数非法") String imageCodeToken) {
+        this.imageCodeToken = imageCodeToken;
     }
 
     public String getTrainCode() {
@@ -100,19 +142,6 @@ public class ConfirmOrderDoReq {
 
     public List<ConfirmOrderTicketReq> getTickets() {
         return tickets;
-    }
-
-    @Override
-    public String toString() {
-        return "confirmOrderDoReq{" +
-                "memberId=" + memberId +
-                ", date=" + date +
-                ", trainCode='" + trainCode + '\'' +
-                ", start='" + start + '\'' +
-                ", end='" + end + '\'' +
-                ", dailyTrainTicketId=" + dailyTrainTicketId +
-                ", tickets=" + tickets +
-                '}';
     }
 
     public void setDailyTrainTicketId(Long dailyTrainTicketId) {
