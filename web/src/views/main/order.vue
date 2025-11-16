@@ -57,7 +57,7 @@
   <a-modal v-model:visible="visible" title="请核对以下信息"
            style="top: 50px; width: 800px"
            ok-text="确认" cancel-text="取消"
-           @ok="handleOk">
+           @ok="showImageCodeModal">
     <div class="order-tickets">
       <a-row class="order-tickets-header" v-if="tickets.length > 0">
         <a-col :span="3">乘客</a-col>
@@ -91,18 +91,34 @@
       </div>
       <div v-else style="text-align: center">
         <a-switch class="choose-seat-item" v-for="item in SEAT_COL_ARRAY" :key="item.code"
-                  v-model:checked="chooseSeatObj[item.code + '1']" :checked-children="item.desc" :un-checked-children="item.desc" />
+                  v-model:checked="chooseSeatObj[item.code + '1']" :checked-children="item.desc"
+                  :un-checked-children="item.desc"/>
         <div v-if="tickets.length > 1">
           <a-switch class="choose-seat-item" v-for="item in SEAT_COL_ARRAY" :key="item.code"
-                    v-model:checked="chooseSeatObj[item.code + '2']" :checked-children="item.desc" :un-checked-children="item.desc" />
+                    v-model:checked="chooseSeatObj[item.code + '2']" :checked-children="item.desc"
+                    :un-checked-children="item.desc"/>
         </div>
-        <div style="color: #999999">提示：您可以选择{{tickets.length}}个座位</div>
+        <div style="color: #999999">提示：您可以选择{{ tickets.length }}个座位</div>
       </div>
 
-      <br/>
-      最终购票：{{tickets}}}
-      最终选座：{{chooseSeatObj}}}
+      <!--      <br/>-->
+      <!--      最终购票：{{tickets}}}-->
+      <!--      最终选座：{{chooseSeatObj}}}-->
     </div>
+  </a-modal>
+
+  <!-- 验证码 -->
+  <a-modal v-model:visible="imageCodeModalVisible" :title="null" :footer="null" :closable="false"
+           style="top: 50px; width: 400px">
+    <p style="text-align: center; font-weight: bold; font-size: 18px">使用验证码削弱瞬时高峰</p>
+    <p>
+      <a-input v-model:value="imageCode" placeholder="图片验证码">
+        <template #suffix>
+          <img v-show="!!imageCodeSrc" :src="imageCodeSrc" alt="验证码" v-on:click="loadImageCode()"/>
+        </template>
+      </a-input>
+    </p>
+    <a-button type="danger" block @click="handleOk">输入验证码后开始购票</a-button>
   </a-modal>
 
 </template>
@@ -300,6 +316,11 @@ export default defineComponent({
     };
 
     const handleOk = () => {
+      if (Tool.isEmpty(imageCode.value)) {
+        notification.error({description: '验证码不能为空'});
+        return;
+      }
+
       console.log("选好的座位：", chooseSeatObj.value);
 
       // 设置每张票的座位
@@ -344,8 +365,25 @@ export default defineComponent({
       });
 
 
-
     }
+
+    /* ------------------------- 验证码 ------------------------- */
+    const imageCodeModalVisible = ref();
+    const imageCodeToken = ref();
+    const imageCodeSrc = ref();
+    const imageCode = ref();
+    /**
+     * 加载图形验证码
+     */
+    const loadImageCode = () => {
+      imageCodeToken.value = Tool.uuid(8);
+      imageCodeSrc.value = process.env.VUE_APP_SERVER + '/business/kaptcha/image-code/' + imageCodeToken.value;
+    };
+
+    const showImageCodeModal = () => {
+      loadImageCode();
+      imageCodeModalVisible.value = true;
+    };
 
 
     onMounted(() => {
@@ -366,7 +404,13 @@ export default defineComponent({
       chooseSeatType,
       chooseSeatObj,
       SEAT_COL_ARRAY,
-      handleOk
+      handleOk,
+      imageCodeToken,
+      imageCodeSrc,
+      imageCode,
+      showImageCodeModal,
+      imageCodeModalVisible,
+      loadImageCode
     }
   }
 })
