@@ -110,7 +110,7 @@
   <!-- 验证码 -->
   <a-modal v-model:visible="imageCodeModalVisible" :title="null" :footer="null" :closable="false"
            style="top: 50px; width: 400px">
-    <p style="text-align: center; font-weight: bold; font-size: 18px">使用验证码削弱瞬时高峰</p>
+    <p style="text-align: center; font-weight: bold; font-size: 18px">请输入正确的验证码</p>
     <p>
       <a-input v-model:value="imageCode" placeholder="图片验证码">
         <template #suffix>
